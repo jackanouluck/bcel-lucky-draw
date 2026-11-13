@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCEL Lucky Draw - ລະບົບສຸ່ມລາງວັນ ທຄຕລ</title>
+    <title>BCEL Lucky Draw - ລະບົບສຸ່ມລາງວັນອອນລາຍ (Supabase Synced)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Noto Sans Lao & Plus Jakarta Sans -->
+    <!-- SheetJS (xlsx) for Excel import/export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Lao Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- SheetJS for Excel import/export -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
         tailwind.config = {
@@ -22,26 +24,58 @@
                     colors: {
                         bcel: {
                             red: '#E30613',
-                            darkred: '#B8040F',
                             navy: '#1B1B65',
-                            yellow: '#FFEE00',
-                            gold: '#FACC15',
-                            lightbg: '#F8FAFC'
+                            darknavy: '#0E0E3B',
+                            gold: '#FFEE00',
+                            golddark: '#D4AF37',
+                            graybg: '#F8FAFC'
                         }
                     },
                     fontFamily: {
-                        sans: ['"Noto Sans Lao"', '"Plus Jakarta Sans"', 'sans-serif']
+                        lao: ['"Noto Sans Lao"', '"Plus Jakarta Sans"', 'sans-serif']
                     }
                 }
             }
         }
     </script>
+
     <style>
         body {
             font-family: 'Noto Sans Lao', 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1B1B65 50%, #0f172a 100%);
+            background-color: #0E0E3B;
+            color: #1E293B;
             min-height: 100vh;
-            color: #f8fafc;
+        }
+
+        /* Slot Machine Animations */
+        .slot-window {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.9) 100%);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 20px rgba(227, 6, 19, 0.4);
+            border: 3px solid #D4AF37;
+        }
+
+        .gold-border {
+            border: 2px solid #D4AF37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFF5C0 0%, #FFEE00 50%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .bcel-btn-red {
+            background: linear-gradient(135deg, #FF1E27 0%, #E30613 50%, #B8000A 100%);
+            box-shadow: 0 4px 15px rgba(227, 6, 19, 0.4), 0 2px 0 #850006;
+        }
+        .bcel-btn-red:hover {
+            background: linear-gradient(135deg, #FF353D 0%, #F50B18 50%, #C9020D 100%);
+            transform: translateY(-1px);
+        }
+        .bcel-btn-red:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(227, 6, 19, 0.4);
         }
 
         /* Custom Scrollbars */
@@ -50,1110 +84,1065 @@
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.5);
         }
         ::-webkit-scrollbar-thumb {
-            background: #E30613;
-            border-radius: 4px;
-        }
-
-        /* Glassmorphism utility */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            color: #0f172a;
-        }
-
-        /* Slot Machine Drum Effect */
-        .slot-container {
-            perspective: 1000px;
-        }
-        .slot-reel {
-            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8);
-        }
-
-        /* Glowing Effects */
-        .glow-red {
-            box-shadow: 0 0 25px rgba(227, 6, 19, 0.6);
-        }
-        .glow-yellow {
-            box-shadow: 0 0 25px rgba(255, 238, 0, 0.6);
-        }
-
-        /* Pulsing Button animation */
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(227, 6, 19, 0.7); transform: scale(1); }
-            50% { box-shadow: 0 0 35px rgba(255, 238, 0, 0.9); transform: scale(1.03); }
-        }
-        .pulse-btn {
-            animation: pulseGlow 2.5s infinite ease-in-out;
+            background: #D4AF37;
+            border-radius: 3px;
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen text-slate-100 selection:bg-bcel-red selection:text-white">
+<body class="bg-bcel-darknavy text-slate-100 flex flex-col min-h-screen selection:bg-bcel-red selection:text-white">
 
-    <!-- TOP BAR / HEADER -->
-    <header class="w-full bg-slate-900/80 border-b border-white/10 sticky top-0 z-30 backdrop-blur-md px-4 py-3">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-            <!-- Brand & Event Title -->
+    <!-- Header Section -->
+    <header class="bg-slate-900/90 border-b border-bcel-gold/30 sticky top-0 z-30 backdrop-blur-md px-4 py-3 shadow-xl">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Logo & Event Title -->
             <div class="flex items-center gap-3">
-                <div id="header-logo-container" class="w-12 h-12 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center overflow-hidden">
-                    <!-- Dynamic Logo injected here -->
+                <div id="headerLogoContainer" class="w-12 h-12 bg-white rounded-xl p-1 shadow-md flex items-center justify-center border border-bcel-gold/50 overflow-hidden">
+                    <img id="headerLogoImg" src="" alt="BCEL Logo" class="max-h-full max-w-full object-contain">
                 </div>
                 <div>
-                    <h1 id="header-event-title" class="font-extrabold text-lg sm:text-xl text-white tracking-wide flex items-center gap-2">
-                        <span>ງານລຸ້ນຮັບລາງວັນ BCEL Lucky Draw 2026</span>
+                    <h1 id="displayEventTitle" class="text-xl md:text-2xl font-extrabold gold-gradient-text tracking-wide uppercase">
+                        BCEL LUCKY DRAW 2026
                     </h1>
-                    <p id="header-event-subtitle" class="text-xs text-bcel-yellow font-medium">ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ (BCEL)</p>
+                    <p id="displayEventSubtitle" class="text-xs text-slate-300 font-medium">
+                        ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ - ງານສຸ່ມລາງວັນຜູ້ໂຊກດີ
+                    </p>
                 </div>
             </div>
 
-            <!-- Controls: Sound, Mode, Admin Modal Button -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <!-- Sound Toggle -->
-                <button id="sound-btn" onclick="toggleSound()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-2 text-sm transition">
-                    <i id="sound-icon" class="fa-solid fa-volume-high text-bcel-yellow"></i>
-                    <span class="hidden md:inline">ສຽງ</span>
-                </button>
-
-                <!-- Mode Selector -->
-                <div class="bg-slate-800/90 p-1 rounded-xl border border-slate-700 flex items-center text-xs font-semibold">
-                    <button id="mode-slot-btn" onclick="switchMode('slot')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-bcel-red text-white shadow-md">
-                        <i class="fa-solid fa-bolt"></i> Slot Machine
-                    </button>
-                    <button id="mode-wheel-btn" onclick="switchMode('wheel')" class="px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
-                        <i class="fa-solid fa-circle-notch"></i> ວົງລໍ້ Lucky Wheel
-                    </button>
+            <!-- Top Right Action Controls & Cloud Sync Status -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- Sync Status Badge -->
+                <div id="syncBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-amber-300 border border-amber-500/30 shadow-inner">
+                    <i id="syncIcon" class="fa-solid fa-cloud-arrow-down animate-pulse text-amber-400"></i>
+                    <span id="syncText">ກຳລັງກວດສອບ Cloud...</span>
                 </div>
 
-                <!-- Admin Button -->
-                <button onclick="openAdminModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-bcel-navy to-slate-800 hover:from-slate-800 hover:to-bcel-navy border border-bcel-yellow/40 text-bcel-yellow font-bold text-sm shadow-lg flex items-center gap-2 transition transform hover:scale-105">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span>ຈັດການ (Admin)</span>
+                <!-- Refresh Data Button -->
+                <button onclick="manualRefreshCloud()" title="ດຶງຂໍ້ມູນໃໝ່ຈາກ Cloud" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate text-bcel-gold"></i>
+                    <span class="hidden sm:inline">ດຶງຂໍ້ມູນໃໝ່</span>
+                </button>
+
+                <!-- Audio Sound Mute Toggle -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-bcel-gold transition" title="ເປີດ/ປິດ ສຽງ">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+
+                <!-- Admin Management Button -->
+                <button onclick="openAdminSecurityModal()" class="px-4 py-2 bg-gradient-to-r from-bcel-navy to-slate-800 hover:from-bcel-red hover:to-red-700 border border-bcel-gold/40 text-white rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-sliders text-bcel-gold"></i>
+                    <span>ຈັດການລະບົບ (Admin)</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- MAIN LUCKY DRAW STAGE -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col items-center justify-between gap-6">
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- ACTIVE PRIZE SELECTION STRIP -->
-        <div class="w-full glass-panel rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 border border-bcel-yellow/20">
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <span class="text-xs font-bold uppercase tracking-wider text-bcel-yellow bg-bcel-red/30 px-2.5 py-1 rounded-md border border-bcel-red/50">
-                    <i class="fa-solid fa-gift mr-1"></i> ລາງວັນທີ່ກຳລັງສຸ່ມ:
-                </span>
-                <select id="active-prize-select" onchange="changeActivePrize(this.value)" class="bg-slate-900 text-white font-semibold text-sm sm:text-base border border-slate-700 rounded-xl px-4 py-2.5 outline-none focus:border-bcel-yellow flex-1 md:w-72 shadow-inner">
-                    <!-- Dynamically Populated -->
-                </select>
-            </div>
-
-            <!-- Active Prize Summary Banner -->
-            <div id="active-prize-card" class="flex items-center gap-4 bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-700 w-full md:w-auto justify-between md:justify-end">
-                <!-- Injected via JS -->
-            </div>
-        </div>
-
-        <!-- STAGE CENTER: SLOT MACHINE OR LUCKY WHEEL -->
-        <div class="w-full flex-1 flex flex-col items-center justify-center my-2 relative">
+        <!-- Mode Switcher Tabs & Active Prize Cards -->
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
             
-            <!-- MODE 1: AUTOMATED SLOT MACHINE -->
-            <div id="stage-slot" class="w-full max-w-3xl flex flex-col items-center gap-6">
-                <!-- Slot Display Box -->
-                <div class="w-full glass-panel rounded-3xl p-6 sm:p-8 flex flex-col items-center gap-6 relative border-2 border-bcel-red/40 shadow-2xl overflow-hidden">
-                    
-                    <!-- Decorative Corner Lights -->
-                    <div class="absolute top-3 left-3 w-3 h-3 rounded-full bg-bcel-yellow animate-ping"></div>
-                    <div class="absolute top-3 right-3 w-3 h-3 rounded-full bg-bcel-red animate-ping"></div>
-                    <div class="absolute bottom-3 left-3 w-3 h-3 rounded-full bg-bcel-red animate-ping"></div>
-                    <div class="absolute bottom-3 right-3 w-3 h-3 rounded-full bg-bcel-yellow animate-ping"></div>
-
-                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fa-solid fa-microchip text-bcel-yellow"></i> ລະບົບສຸ່ມລາຍຊື່ຜູ້ໂຊກດີ (RANDOM SELECTOR)
-                    </div>
-
-                    <!-- Main Reels Container -->
-                    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950/90 p-4 rounded-2xl border border-slate-800 shadow-2xl">
-                        <!-- Reel 1: Code -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[110px] slot-reel">
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">ລະຫັດ / CODE</span>
-                            <span id="slot-code" class="text-2xl sm:text-3xl font-extrabold text-bcel-yellow tracking-wider font-mono">BCEL-???</span>
-                        </div>
-                        <!-- Reel 2: Name -->
-                        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[110px] slot-reel md:col-span-2">
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">ຊື່ ແລະ ນາມສະກຸນ / NAME</span>
-                            <span id="slot-name" class="text-xl sm:text-2xl font-extrabold text-white truncate max-w-full">ກົດປຸ່ມເລີ່ມສຸ່ມ</span>
-                            <span id="slot-dept" class="text-xs text-slate-400 truncate max-w-full mt-1">ກະລຸນາເລືອກລາງວັນ ແລ້ວກົດ SPIN</span>
-                        </div>
-                    </div>
-
-                    <!-- Participant Stats Indicator -->
-                    <div class="flex items-center gap-4 text-xs font-medium text-slate-400">
-                        <span><i class="fa-solid fa-users text-bcel-yellow mr-1"></i> ຜູ້ມີສິດທັງໝົດ: <strong id="slot-total-count" class="text-white">0</strong> ທ່ານ</span>
-                        <span>|</span>
-                        <span><i class="fa-solid fa-user-check text-green-400 mr-1"></i> ຍັງເຫຼືອ: <strong id="slot-eligible-count" class="text-bcel-yellow">0</strong> ທ່ານ</span>
-                    </div>
-                </div>
-
-                <!-- SINGLE SPIN BUTTON -->
-                <button id="slot-spin-btn" onclick="startSlotSpin()" class="pulse-btn w-64 sm:w-80 py-4 px-8 rounded-2xl bg-gradient-to-r from-bcel-red via-red-600 to-bcel-darkred text-white text-xl font-black shadow-2xl flex items-center justify-center gap-3 tracking-wider hover:brightness-110 active:scale-95 transition cursor-pointer border-2 border-bcel-yellow/50">
-                    <i class="fa-solid fa-play text-2xl"></i>
-                    <span>ເລີ່ມສຸ່ມ (SPIN)</span>
+            <!-- Dual Mode Buttons -->
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 self-start md:self-auto">
+                <button id="tabModeSlot" onclick="switchDrawMode('slot')" class="px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 bg-bcel-red text-white shadow-md">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Slot Machine (ສຸ່ມໄວ)</span>
+                </button>
+                <button id="tabModeWheel" onclick="switchDrawMode('wheel')" class="px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-compact-disc"></i>
+                    <span>Lucky Wheel (ວົງລໍ້)</span>
                 </button>
             </div>
 
-            <!-- MODE 2: HTML5 CANVAS LUCKY WHEEL -->
-            <div id="stage-wheel" class="w-full max-w-2xl flex flex-col items-center gap-6 hidden">
-                <div class="relative flex items-center justify-center p-2">
-                    <!-- Top Pointer Pointer Indicator -->
-                    <div class="absolute -top-3 z-20 w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-t-[32px] border-t-bcel-yellow filter drop-shadow-lg"></div>
-                    
-                    <!-- Wheel Canvas -->
-                    <div class="rounded-full border-4 border-bcel-yellow/60 shadow-2xl p-1 bg-slate-900 glow-red">
-                        <canvas id="wheel-canvas" width="460" height="460" class="rounded-full max-w-full h-auto cursor-pointer"></canvas>
-                    </div>
+            <!-- Active Prize Selector Selector -->
+            <div class="flex-1 flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                <span class="text-xs font-semibold text-slate-400 shrink-0"><i class="fa-solid fa-gift text-bcel-gold mr-1"></i>ເລືອກລາງວັນ:</span>
+                <div id="prizeSelectorContainer" class="flex items-center gap-2 min-w-max">
+                    <!-- Dynamic Prize Pills -->
                 </div>
-
-                <!-- Wheel Spin Button -->
-                <button id="wheel-spin-btn" onclick="startWheelSpin()" class="pulse-btn w-64 sm:w-72 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-bcel-red via-red-600 to-bcel-navy text-white text-lg font-black shadow-xl flex items-center justify-center gap-3 hover:brightness-110 active:scale-95 transition cursor-pointer border border-bcel-yellow/50">
-                    <i class="fa-solid fa-rotate text-xl"></i>
-                    <span>ໝຸນວົງລໍ້ (SPIN)</span>
-                </button>
             </div>
         </div>
 
-        <!-- FOOTER BRANDING -->
-        <footer class="w-full text-center py-2 text-xs text-slate-500 border-t border-slate-800/80">
-            <p>© 2026 BCEL Lucky Draw System - Banque Pour Le Commerce Exterieur Lao Public</p>
-        </footer>
+        <!-- Draw Display Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            <!-- Left 2 Cols: Main Draw Arena (Slot or Wheel) -->
+            <div class="lg:col-span-2 bg-slate-900/80 rounded-3xl p-6 border border-bcel-gold/30 shadow-2xl flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden">
+                
+                <!-- Background Ambient Glow -->
+                <div class="absolute -top-24 -left-24 w-72 h-72 bg-bcel-red/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-bcel-navy/40 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Current Selected Prize Header Info -->
+                <div class="w-full text-center mb-6 z-10">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-bcel-red/20 border border-bcel-red/50 rounded-full text-bcel-gold text-xs font-bold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span id="activePrizeNameDisplay">ກຳລັງໂຫຼດລາງວັນ...</span>
+                    </div>
+                    <p class="text-xs text-slate-400">
+                        ໂຄຕ້າທີ່ເຫຼືອ: <span id="activePrizeQuotaDisplay" class="font-bold text-white">0</span> / <span id="activePrizeTotalDisplay" class="text-slate-400">0</span>
+                    </p>
+                </div>
+
+                <!-- SLOT MACHINE VIEW -->
+                <div id="slotMachineView" class="w-full flex flex-col items-center justify-center z-10">
+                    
+                    <!-- Digital Slot Reels Container -->
+                    <div class="slot-window w-full max-w-xl rounded-2xl p-4 md:p-6 mb-8 relative">
+                        <!-- Horizontal Center Guide Line -->
+                        <div class="absolute top-1/2 left-0 right-0 h-1 bg-bcel-gold/40 -translate-y-1/2 pointer-events-none z-20 shadow-[0_0_8px_#FFEE00]"></div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-center font-extrabold">
+                            <!-- Reel 1: Code/ID -->
+                            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[100px] shadow-inner">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">ລະຫັດ / ID</span>
+                                <span id="slotReelCode" class="text-xl md:text-2xl text-bcel-gold font-mono tracking-wider">XXXX</span>
+                            </div>
+
+                            <!-- Reel 2: Full Name -->
+                            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[100px] shadow-inner">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">ຊື່ ແລະ ນາມສະກຸນ</span>
+                                <span id="slotReelName" class="text-xl md:text-2xl text-white font-bold truncate max-w-full">???</span>
+                            </div>
+
+                            <!-- Reel 3: Department / Phone -->
+                            <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[100px] shadow-inner">
+                                <span class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">ພະແນກ / ເບີໂທ</span>
+                                <span id="slotReelDept" class="text-base md:text-lg text-slate-300 truncate max-w-full">----</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Single Start Spin Button (Auto Decelerates & Stops) -->
+                    <button id="startSpinBtn" onclick="startSlotDraw()" class="bcel-btn-red text-white text-lg md:text-xl font-black px-10 py-4 rounded-full flex items-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-2xl gold-border cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>ເລີ່ມສຸ່ມລາງວັນ (START)</span>
+                    </button>
+                </div>
+
+                <!-- LUCKY WHEEL VIEW -->
+                <div id="luckyWheelView" class="w-full flex flex-col items-center justify-center hidden z-10">
+                    <div class="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center mb-6">
+                        <!-- Top Wheel Pointer Arrow -->
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-bcel-gold text-3xl filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.8)]">
+                            <i class="fa-solid fa-caret-down"></i>
+                        </div>
+                        <!-- Canvas Element -->
+                        <canvas id="wheelCanvas" width="400" height="400" class="w-full h-full rounded-full shadow-2xl border-4 border-bcel-gold"></canvas>
+                        
+                        <!-- Center Logo Cap -->
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full border-4 border-bcel-gold shadow-lg flex items-center justify-center overflow-hidden p-1 z-10 pointer-events-none">
+                            <img id="wheelCenterLogo" src="" alt="BCEL" class="max-w-full max-h-full object-contain">
+                        </div>
+                    </div>
+
+                    <button id="spinWheelBtn" onclick="spinLuckyWheel()" class="bcel-btn-red text-white text-lg font-black px-8 py-3 rounded-full flex items-center gap-2 hover:scale-105 active:scale-95 transition shadow-xl gold-border">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>ໝູນວົງລໍ້ (SPIN WHEEL)</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Right 1 Col: Live Stats & Recent Winners Sidebar -->
+            <div class="bg-slate-900/80 rounded-3xl p-5 border border-slate-800 flex flex-col gap-4 min-h-[420px]">
+                
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-bcel-gold"></i>
+                        <span>ຜູ້ເຂົ້າຮ່ວມ & ຜູ້ໂຊກດີ</span>
+                    </h3>
+                    <span id="participantCountBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-bcel-navy text-bcel-gold border border-bcel-gold/30">
+                        0 ຄົນ
+                    </span>
+                </div>
+
+                <!-- Recent Winners Mini List -->
+                <div class="flex-1 flex flex-col">
+                    <h4 class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider flex items-center justify-between">
+                        <span>ຜູ້ໂຊກດີລ້າສຸດ:</span>
+                        <button onclick="switchAdminTab('tabWinners'); openAdminModal();" class="text-[11px] text-bcel-gold hover:underline">ເບິ່ງທັງໝົດ</button>
+                    </h4>
+
+                    <div id="recentWinnersList" class="flex-1 space-y-2 overflow-y-auto max-h-[300px] pr-1">
+                        <!-- Dynamic Recent Winner Cards -->
+                    </div>
+                </div>
+
+                <!-- Event Stats Summary -->
+                <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-800 text-center">
+                    <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400">ລາງວັນທີ່ແຈກແລ້ວ</div>
+                        <div id="totalWonCount" class="text-base font-black text-bcel-gold">0</div>
+                    </div>
+                    <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400">ລາງວັນຄົງເຫຼືອ</div>
+                        <div id="totalRemainingCount" class="text-base font-black text-emerald-400">0</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </main>
 
-    <!-- WINNER CELEBRATION MODAL -->
-    <div id="winner-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
-        <!-- Confetti Canvas -->
-        <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full"></canvas>
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-3 text-center text-xs text-slate-400 mt-auto">
+        <p>© 2026 BCEL - Banque Pour Le Commerce Exterieur Lao Public. Cloud Synced with Supabase.</p>
+    </footer>
 
-        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center flex flex-col items-center gap-5 relative z-20 border-4 border-bcel-gold shadow-2xl transform scale-90 transition-all duration-300" id="winner-card">
+    <!-- WINNER REVEAL MODAL -->
+    <div id="winnerModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-bcel-darknavy border-2 border-bcel-gold rounded-3xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden animate-bounce-short">
             
-            <!-- Winner Header Logo -->
-            <div id="winner-logo-container" class="w-16 h-16 rounded-2xl bg-slate-100 p-2 shadow-md flex items-center justify-center overflow-hidden border border-slate-200">
-                <!-- Dynamic Logo -->
+            <!-- Close Cross -->
+            <button onclick="closeWinnerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Winner Header Banner -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-bcel-gold text-slate-950 font-black rounded-full text-xs uppercase tracking-widest mb-4 shadow-lg">
+                <i class="fa-solid fa-crown"></i>
+                <span>ຂໍສະແດງຄວາມຍິນດີ! WINNER</span>
             </div>
 
-            <div>
-                <span class="inline-block px-4 py-1.5 rounded-full bg-bcel-red text-white text-xs font-black uppercase tracking-widest shadow-sm mb-2">
-                    🎉 ຂໍສະແດງຄວາມຍິນດີ ຜູ້ໂຊກດີ 🎉
-                </span>
-                <h3 id="winner-prize-title" class="text-xl font-bold text-bcel-navy">ລາງວັນທີ 1</h3>
+            <div class="w-20 h-20 bg-white rounded-full mx-auto p-1 border-2 border-bcel-gold shadow-lg mb-4 flex items-center justify-center">
+                <img id="winnerModalLogo" src="" alt="BCEL" class="max-w-full max-h-full object-contain">
             </div>
 
-            <!-- Winner Prize Image -->
-            <div class="w-28 h-28 rounded-2xl bg-slate-100 border border-slate-200 p-2 flex items-center justify-center overflow-hidden shadow-inner my-1">
-                <img id="winner-prize-img" src="" alt="Prize" class="max-w-full max-h-full object-contain">
-            </div>
+            <h3 id="winnerPrizeTitle" class="text-lg font-bold text-bcel-gold mb-1">ລາງວັນທີ 1</h3>
+            <p id="winnerPrizeDetail" class="text-xs text-slate-300 mb-6">iPhone 15 Pro Max</p>
 
-            <!-- Winner Details Box -->
-            <div class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-200 flex flex-col items-center gap-1 shadow-inner">
-                <span id="winner-code" class="text-sm font-extrabold text-bcel-red font-mono px-3 py-1 rounded-md bg-red-100 border border-red-200">BCEL-000</span>
-                <h2 id="winner-name" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">ທ່ານ ດີໃຈ ຫຼາຍ</h2>
-                <p id="winner-dept" class="text-sm text-slate-600 font-medium">ພະແນກ ເທັກໂນໂລຢີຂໍ້ມູນຂ່າວສານ</p>
+            <!-- Winner Card Box -->
+            <div class="bg-slate-950/90 border border-bcel-gold/40 rounded-2xl p-5 mb-6 text-center shadow-inner">
+                <div id="winnerCode" class="text-xs font-mono text-bcel-gold font-bold mb-1">CODE: BCEL-8899</div>
+                <div id="winnerName" class="text-2xl md:text-3xl font-extrabold text-white mb-2">ທ່ານ ສົມໄຊ ໄຊຍະວົງ</div>
+                <div id="winnerDept" class="text-sm font-medium text-slate-300">ພະແນກ ເທັກໂນໂລຊີ ສາລານformat</div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="grid grid-cols-2 gap-3 w-full pt-2">
-                <button onclick="respinWinner()" class="py-3 px-4 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                    <span>ສະລະສິດ / ສຸ່ມໃໝ່</span>
-                </button>
-                <button onclick="confirmWinner()" class="py-3 px-4 rounded-xl bg-gradient-to-r from-bcel-red to-red-600 hover:brightness-110 text-white font-bold text-sm shadow-lg transition flex items-center justify-center gap-2">
+            <div class="flex items-center gap-3 justify-center">
+                <button onclick="confirmAndSaveWinner()" class="bcel-btn-red text-white text-sm font-bold px-6 py-2.5 rounded-xl flex-1 shadow-lg flex items-center justify-center gap-2">
                     <i class="fa-solid fa-check"></i>
-                    <span>ຢືນຢັນຜູ້ໂຊກດີ</span>
+                    <span>ຢືນຢັນຜູ້ໂຊກດີ (Save)</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ADMIN MODAL WITH 4 TABS -->
-    <div id="admin-modal" class="fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden text-slate-100">
+    <!-- SECURITY PIN MODAL (Protected Admin Access) -->
+    <div id="adminPinModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-bcel-gold/40 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center">
+            <div class="w-12 h-12 bg-bcel-navy text-bcel-gold rounded-full mx-auto flex items-center justify-center text-xl mb-3 border border-bcel-gold/30">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1">ປ້ອນລະຫັດຜ່ານ Admin</h3>
+            <p class="text-xs text-slate-400 mb-4">ກະລຸນາປ້ອນ PIN 4 ຫຼັກ ເພື່ອເຂົ້າສູ່ລະບົບຕັ້ງຄ່າ</p>
             
-            <!-- Admin Header -->
-            <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+            <input type="password" id="adminPinInput" maxlength="6" placeholder="****" class="w-full text-center text-2xl tracking-widest font-mono bg-slate-950 border border-slate-700 text-bcel-gold rounded-xl py-3 mb-4 focus:outline-none focus:border-bcel-gold">
+
+            <div class="flex gap-2">
+                <button onclick="closeAdminPinModal()" class="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">ຍົກເລີກ</button>
+                <button onclick="verifyAdminPin()" class="w-1/2 py-2.5 bcel-btn-red text-white rounded-xl text-xs font-bold">ເຂົ້າສູ່ລະບົບ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN ADMIN MANAGEMENT PANEL MODAL -->
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 hidden">
+        <div class="bg-slate-900 border border-bcel-gold/40 rounded-3xl max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            <!-- Admin Top Header -->
+            <div class="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-bcel-red flex items-center justify-center text-white font-bold">
-                        <i class="fa-solid fa-gear"></i>
+                    <div class="w-9 h-9 bg-bcel-red/20 text-bcel-red rounded-xl flex items-center justify-center border border-bcel-red/40">
+                        <i class="fa-solid fa-sliders text-lg"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-lg text-white">ລະບົບຫຼັງບ້ານ (Admin Management Panel)</h2>
+                        <h2 class="text-base md:text-lg font-bold text-white">ແຜງຄວບຄຸມລະບົບ Admin (Supabase Synced)</h2>
                         <p class="text-xs text-slate-400">ຈັດການລາຍຊື່, ຂອງລາງວັນ, ປະຫວັດ ແລະ ຕັ້ງຄ່າງານ</p>
                     </div>
                 </div>
-                <button onclick="closeAdminModal()" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button onclick="closeAdminModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Admin Tabs Bar -->
-            <div class="flex items-center bg-slate-950/60 px-6 border-b border-slate-800 overflow-x-auto">
-                <button id="admin-tab-btn-1" onclick="switchAdminTab(1)" class="px-4 py-3 border-b-2 border-bcel-red font-bold text-sm text-bcel-yellow flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-users"></i> 1. ຈັດການລາຍຊື່ (Participants)
+            <!-- Admin Navigation Tabs -->
+            <div class="flex border-b border-slate-800 bg-slate-950/50 px-6 overflow-x-auto">
+                <button id="navTabParticipants" onclick="switchAdminTab('tabParticipants')" class="py-3 px-4 border-b-2 border-bcel-gold text-bcel-gold text-xs font-bold flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-users"></i>
+                    <span>1. ຈັດການລາຍຊື່ (<span id="adminParticipantsCount">0</span>)</span>
                 </button>
-                <button id="admin-tab-btn-2" onclick="switchAdminTab(2)" class="px-4 py-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-gift"></i> 2. ຈັດການຂອງລາງວັນ (Prizes)
+                <button id="navTabPrizes" onclick="switchAdminTab('tabPrizes')" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-bold flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-gift"></i>
+                    <span>2. ຈັດການຂອງລາງວັນ (<span id="adminPrizesCount">0</span>)</span>
                 </button>
-                <button id="admin-tab-btn-3" onclick="switchAdminTab(3)" class="px-4 py-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-trophy"></i> 3. ປະຫວັດຜູ້ໂຊກດີ (Winners)
+                <button id="navTabWinners" onclick="switchAdminTab('tabWinners')" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-bold flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span>3. ປະຫວັດຜູ້ໂຊກດີ (<span id="adminWinnersCount">0</span>)</span>
                 </button>
-                <button id="admin-tab-btn-4" onclick="switchAdminTab(4)" class="px-4 py-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-sliders"></i> 4. ຕັ້ງຄ່າງານ & ໂລໂກ້
+                <button id="navTabSettings" onclick="switchAdminTab('tabSettings')" class="py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-bold flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>4. ຕັ້ງຄ່າງານ & ໂລໂກ້</span>
                 </button>
             </div>
 
-            <!-- Admin Body / Tab Contents -->
-            <div class="flex-1 overflow-y-auto p-6 bg-slate-900/50">
+            <!-- Admin Body Tab Contents -->
+            <div class="flex-1 overflow-y-auto p-6">
 
-                <!-- TAB 1: PARTICIPANTS & EXCEL IMPORT -->
-                <div id="admin-tab-1" class="flex flex-col gap-6">
-                    <!-- Excel Import & Quick Actions -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Import Excel Card -->
-                        <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex flex-col justify-between gap-3 md:col-span-2">
-                            <div>
-                                <h3 class="font-bold text-white text-base flex items-center gap-2">
-                                    <i class="fa-solid fa-file-excel text-green-400"></i> ນຳເຂົ້າໄຟລ໌ Excel / CSV
-                                </h3>
-                                <p class="text-xs text-slate-400 mt-1">ຮອງຮັບໄຟລ໌ .xlsx, .xls, .csv (ຄວນມີຄໍລຳ: ລະຫັດ/Code, ຊື່/Name, ພະແນກ/Dept/Phone)</p>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <label class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold text-xs rounded-xl cursor-pointer shadow flex items-center gap-2 transition">
-                                    <i class="fa-solid fa-upload"></i> ເລືອກໄຟລ໌ Excel
-                                    <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelImport(event)">
-                                </label>
-                                <button onclick="downloadExcelTemplate()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs rounded-xl flex items-center gap-2 transition">
-                                    <i class="fa-solid fa-download"></i> ດາວໂຫຼດ Template
-                                </button>
-                            </div>
+                <!-- TAB 1: PARTICIPANTS MANAGEMENT -->
+                <div id="contentParticipants" class="space-y-6">
+                    
+                    <!-- Import & Actions Toolbar -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                        
+                        <!-- Import Excel/CSV -->
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-300 block">ອັບໂຫຼດ ໄຟລ໌ Excel / CSV:</label>
+                            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" onchange="handleExcelImport(event)" class="text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-bcel-navy file:text-bcel-gold hover:file:bg-slate-800 cursor-pointer">
+                            <p class="text-[10px] text-slate-500">ຮອງຮັບ .xlsx, .xls (ຄໍລຳ: Code, Name, Dept)</p>
                         </div>
 
-                        <!-- Rules & Winner Exclusion Settings -->
-                        <div class="bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex flex-col justify-between gap-3">
-                            <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-shield-halved text-bcel-yellow"></i> ກົດການສຸ່ມ
-                            </h3>
-                            <label class="flex items-center gap-3 cursor-pointer text-xs font-medium text-slate-200">
-                                <input type="checkbox" id="exclude-winners-toggle" onchange="toggleExcludeWinners(this.checked)" class="w-4 h-4 rounded accent-bcel-red">
-                                <span>ຕັດຊື່ຜູ້ທີ່ໄດ້ຮັບລາງວັນແລ້ວອອກຈາກການສຸ່ມຄັ້ງຕໍ່ໄປ</span>
-                            </label>
-                            <button onclick="clearAllParticipants()" class="px-3 py-1.5 bg-red-900/50 hover:bg-red-800 text-red-200 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 transition border border-red-700">
-                                <i class="fa-solid fa-trash-can"></i> ລຶບລາຍຊື່ທັງໝົດ
+                        <!-- Quick Sample Download & Paste -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="downloadExcelTemplate()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium border border-slate-700 flex-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                                <span>ໂຫຼດ ຕົວຢ່າງ Excel</span>
+                            </button>
+                            <button onclick="toggleBulkPasteBox()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium border border-slate-700 flex-1 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-paste text-amber-400"></i>
+                                <span>ວາງລາຍຊື່ (Paste)</span>
+                            </button>
+                        </div>
+
+                        <!-- Clear & Search -->
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="participantSearchInput" oninput="renderParticipantsTable()" placeholder="ຄົ້ນຫາ ຊື່/ລະຫັດ..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white flex-1 focus:outline-none focus:border-bcel-gold">
+                            <button onclick="confirmClearParticipants()" class="px-3 py-2 bg-red-950/60 hover:bg-red-900 text-red-400 rounded-xl text-xs font-bold border border-red-800/40">
+                                <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Manual Add / Auto Generate Section -->
-                    <div class="bg-slate-800/50 border border-slate-700 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-                            <input type="text" id="add-code" placeholder="ລະຫັດ (ເຊັ່ນ: BCEL-001)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
-                            <input type="text" id="add-name" placeholder="ຊື່ ແລະ ນາມສະກຸນ *" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
-                            <input type="text" id="add-dept" placeholder="ພະແນກ / ເບີໂທ" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
-                        </div>
-                        <div class="flex items-center gap-2 w-full md:w-auto">
-                            <button onclick="addSingleParticipant()" class="px-4 py-2 bg-bcel-red hover:bg-red-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition flex-1 md:flex-none">
-                                <i class="fa-solid fa-plus"></i> ເພີ່ມ
-                            </button>
-                            <button onclick="generateDemoParticipants(30)" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-bcel-yellow font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition whitespace-nowrap">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> ສ້າງຕົວຢ່າງ 30 ຊື່
-                            </button>
+                    <!-- Bulk Paste Area (Collapsible) -->
+                    <div id="bulkPasteArea" class="hidden bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                        <label class="text-xs font-bold text-slate-300">ວາງລາຍຊື່ຫຼາຍໆຄົນ (ຮູບແບບ: ລະຫັດ, ຊື່, ພະແນກ):</label>
+                        <textarea id="bulkPasteInput" rows="4" placeholder="BCEL-001, ທ່ານ ສົມໄຊ, ເທັກໂນໂລຊີ
+BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-bcel-gold font-mono"></textarea>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="toggleBulkPasteBox()" class="px-3 py-1.5 text-xs text-slate-400">ຍົກເລີກ</button>
+                            <button onclick="processBulkPaste()" class="px-4 py-1.5 bg-bcel-red text-white text-xs font-bold rounded-xl">ເພີ່ມລາຍຊື່</button>
                         </div>
                     </div>
 
-                    <!-- Participant List Table -->
-                    <div class="bg-slate-800/80 border border-slate-700 rounded-2xl overflow-hidden flex flex-col">
-                        <div class="p-4 border-b border-slate-700 flex flex-wrap items-center justify-between gap-3">
-                            <h4 class="font-bold text-white text-sm">
-                                ລາຍຊື່ຜູ້ຮ່ວມງານ (<span id="table-participant-count">0</span>)
-                            </h4>
-                            <input type="text" id="participant-search" oninput="renderParticipantsTable()" placeholder="ຄົ້ນຫາຊື່, ລະຫັດ..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-bcel-yellow w-56">
-                        </div>
-                        <div class="max-h-72 overflow-y-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead class="bg-slate-950 text-slate-400 sticky top-0">
+                    <!-- Manual Single Add Form -->
+                    <div class="bg-slate-950/40 p-4 rounded-2xl border border-slate-800 grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <input type="text" id="addCodeInput" placeholder="ລະຫັດ (ເຊັ່ນ: BCEL-001)" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bcel-gold">
+                        <input type="text" id="addNameInput" placeholder="ຊື່ ແລະ ນາມສະກຸນ *" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bcel-gold">
+                        <input type="text" id="addDeptInput" placeholder="ພະແນກ / ສາຂາ" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bcel-gold">
+                        <button onclick="addSingleParticipant()" class="bg-bcel-navy hover:bg-slate-800 text-bcel-gold font-bold border border-bcel-gold/40 rounded-xl text-xs py-2">
+                            <i class="fa-solid fa-plus mr-1"></i> ເພີ່ມລາຍຊື່
+                        </button>
+                    </div>
+
+                    <!-- Participants Table -->
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="max-h-[350px] overflow-y-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
                                     <tr>
-                                        <th class="p-3">ລະຫັດ (Code)</th>
+                                        <th class="p-3">#</th>
+                                        <th class="p-3">ລະຫັດ / ID</th>
                                         <th class="p-3">ຊື່ ແລະ ນາມສະກຸນ</th>
-                                        <th class="p-3">ພະແນກ / ຂໍ້ມູນ</th>
-                                        <th class="p-3">ສະຖານະ</th>
+                                        <th class="p-3">ພະແນກ / ສາຂາ</th>
                                         <th class="p-3 text-right">ຈັດການ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="participants-table-body" class="divide-y divide-slate-800 text-slate-300">
+                                <tbody id="participantsTableBody" class="divide-y divide-slate-800">
                                     <!-- Dynamic rows -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
                 </div>
 
-                <!-- TAB 2: PRIZES MANAGEMENT (WITH FULL EDIT SUPPORT) -->
-                <div id="admin-tab-2" class="flex flex-col gap-6 hidden">
+                <!-- TAB 2: PRIZES MANAGEMENT -->
+                <div id="contentPrizes" class="space-y-6 hidden">
                     
-                    <!-- ADD / EDIT PRIZE FORM CONTAINER -->
-                    <div id="prize-form-card" class="bg-slate-800/80 border-2 border-slate-700 p-5 rounded-2xl flex flex-col gap-4 transition-all duration-300">
-                        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-                            <h3 id="prize-form-title" class="font-extrabold text-white text-base flex items-center gap-2">
-                                <i class="fa-solid fa-gift text-bcel-yellow"></i> ເພີ່ມຂອງລາງວັນໃໝ່
-                            </h3>
-                            <span id="prize-form-badge" class="hidden px-2.5 py-0.5 rounded-full text-xs font-bold bg-bcel-yellow text-slate-950">
-                                EDIT MODE
-                            </span>
-                        </div>
+                    <!-- Prize Create / Edit Form -->
+                    <div class="bg-slate-950 p-5 rounded-2xl border border-bcel-gold/30 space-y-4">
+                        <h3 id="prizeFormHeaderTitle" class="text-sm font-bold text-bcel-gold flex items-center gap-2">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>ເພີ່ມຂອງລາງວັນໃໝ່</span>
+                        </h3>
 
-                        <input type="hidden" id="prize-edit-id" value="">
+                        <input type="hidden" id="editPrizeId" value="">
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                            <!-- Prize Name -->
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ຊື່ຂອງລາງວັນ *</label>
-                                <input type="text" id="prize-input-title" placeholder="ເຊັ່ນ: iPhone 15 Pro Max 256GB" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
-                            </div>
-
-                            <!-- Prize Category / Rank -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ໝວດໝູ່ / ລະດັບລາງວັນ</label>
-                                <input type="text" id="prize-input-rank" placeholder="ເຊັ່ນ: ລາງວັນທີ 1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
+                                <label class="text-xs text-slate-400 block mb-1">ຊື່ຂອງລາງວັນ *</label>
+                                <input type="text" id="prizeTitleInput" placeholder="ເຊັ່ນ: iPhone 15 Pro Max" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bcel-gold">
                             </div>
-
-                            <!-- Prize Quantity -->
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ຈຳນວນທັງໝົດ *</label>
-                                <input type="number" id="prize-input-count" min="1" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
+                                <label class="text-xs text-slate-400 block mb-1">ຈຳນວນລາງວັນ (ໂຄຕ້າ) *</label>
+                                <input type="number" id="prizeQuotaInput" min="1" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-bcel-gold">
                             </div>
-
-                            <!-- Prize Description -->
-                            <div class="sm:col-span-2">
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ລາຍລະອຽດເພີ່ມເຕີມ</label>
-                                <input type="text" id="prize-input-desc" placeholder="ເຊັ່ນ: ມອບໂດຍ ທຄຕລ ສາຂາຫຼວງພະບາງ" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-bcel-yellow">
-                            </div>
-
-                            <!-- Prize Image File Upload / URL -->
-                            <div class="sm:col-span-2 flex flex-col justify-end">
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ຮູບພາບຂອງລາງວັນ</label>
-                                <div class="flex items-center gap-3">
-                                    <div id="prize-img-preview-box" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
-                                        <i class="fa-solid fa-image text-slate-600"></i>
-                                    </div>
-                                    <label class="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs rounded-xl cursor-pointer text-center font-semibold transition border border-slate-600 truncate">
-                                        <i class="fa-solid fa-upload mr-1"></i> ອັບໂຫຼດຮູບ
-                                        <input type="file" id="prize-input-file" accept="image/*" class="hidden" onchange="handlePrizeImageUpload(event)">
-                                    </label>
-                                    <input type="hidden" id="prize-input-img-data" value="">
-                                </div>
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">ຮູບພາບລາງວັນ ( Upload )</label>
+                                <input type="file" id="prizeImageInput" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-slate-800 file:text-bcel-gold">
                             </div>
                         </div>
 
-                        <!-- Submit / Cancel Buttons -->
-                        <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-700/60">
-                            <button id="prize-cancel-btn" onclick="cancelPrizeEdit()" class="hidden px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs rounded-xl transition">
-                                ຍົກເລີກ
-                            </button>
-                            <button id="prize-submit-btn" onclick="savePrizeForm()" class="px-6 py-2 bg-bcel-red hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                <span id="prize-submit-text">ບັນທຶກຂອງລາງວັນ</span>
-                            </button>
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="flex items-center gap-3">
+                                <label class="text-xs text-slate-400">ສີປ້າຍລາງວັນ:</label>
+                                <input type="color" id="prizeColorInput" value="#E30613" class="w-8 h-8 rounded border-0 cursor-pointer bg-transparent">
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button id="cancelPrizeEditBtn" onclick="resetPrizeForm()" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold">
+                                    ຍົກເລີກແກ້ໄຂ
+                                </button>
+                                <button onclick="savePrizeItem()" class="bcel-btn-red text-white text-xs font-bold px-6 py-2 rounded-xl">
+                                    <span id="savePrizeBtnText">ບັນທຶກລາງວັນ</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- PRIZES GRID LIST -->
-                    <div class="flex flex-col gap-3">
-                        <h4 class="font-bold text-white text-sm">ລາຍການຂອງລາງວັນທັງໝົດ</h4>
-                        <div id="prizes-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            <!-- Dynamic Cards -->
-                        </div>
+                    <!-- Prizes List Grid -->
+                    <div id="adminPrizesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Dynamic Prize Cards -->
                     </div>
+
                 </div>
 
                 <!-- TAB 3: WINNERS HISTORY -->
-                <div id="admin-tab-3" class="flex flex-col gap-6 hidden">
-                    <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
-                        <div>
-                            <h3 class="font-bold text-white text-base">ປະຫວັດຜູ້ໂຊກດີທີ່ໄດ້ຮັບລາງວັນ</h3>
-                            <p class="text-xs text-slate-400">ຈຳນວນຜູ້ໄດ້ຮັບລາງວັນທັງໝົດ: <strong id="winners-total-count" class="text-bcel-yellow">0</strong> ທ່ານ</p>
+                <div id="contentWinners" class="space-y-6 hidden">
+                    
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">ຕອງລາງວັນ:</span>
+                            <select id="winnerFilterPrizeSelect" onchange="renderWinnersTable()" class="bg-slate-900 border border-slate-700 text-xs text-white rounded-xl px-3 py-1.5 focus:outline-none">
+                                <option value="ALL">ທຸກລາງວັນ</option>
+                            </select>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="exportWinnersExcel()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2 transition">
-                                <i class="fa-solid fa-file-excel"></i> Export Excel (.xlsx)
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="exportWinnersToExcel()" class="px-3 py-2 bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 border border-emerald-700 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>ສົ່ງອອກ Excel</span>
                             </button>
-                            <button onclick="clearWinnersHistory()" class="px-4 py-2 bg-red-900/60 hover:bg-red-800 text-red-200 font-bold text-xs rounded-xl flex items-center gap-2 transition border border-red-700">
-                                <i class="fa-solid fa-rotate-left"></i> ລ້າງປະຫວັດຜູ້ໂຊກດີ
+                            <button onclick="exportWinnersToCSV()" class="px-3 py-2 bg-blue-900/60 hover:bg-blue-800 text-blue-300 border border-blue-700 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-csv"></i>
+                                <span>ສົ່ງອອກ CSV</span>
+                            </button>
+                            <button onclick="confirmClearWinners()" class="px-3 py-2 bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                <span>ລ້າງປະຫວັດ</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Winners Table -->
-                    <div class="bg-slate-800/80 border border-slate-700 rounded-2xl overflow-hidden">
-                        <div class="max-h-96 overflow-y-auto">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead class="bg-slate-950 text-slate-400 sticky top-0">
+                    <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="max-h-[400px] overflow-y-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-slate-900 text-slate-400 sticky top-0 border-b border-slate-800">
                                     <tr>
-                                        <th class="p-3">ເວລາໄດ້ຮັບ</th>
+                                        <th class="p-3">#</th>
                                         <th class="p-3">ລາງວັນທີ່ໄດ້</th>
-                                        <th class="p-3">ລະຫັດ (Code)</th>
+                                        <th class="p-3">ລະຫັດ / ID</th>
                                         <th class="p-3">ຊື່ ແລະ ນາມສະກຸນ</th>
-                                        <th class="p-3">ພະແນກ / ຂໍ້ມູນ</th>
+                                        <th class="p-3">ພະແນກ / ສາຂາ</th>
+                                        <th class="p-3">ເວລາທີ່ໄດ້</th>
+                                        <th class="p-3 text-right">ລຶບ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="winners-table-body" class="divide-y divide-slate-800 text-slate-300">
+                                <tbody id="winnersTableBody" class="divide-y divide-slate-800">
                                     <!-- Dynamic Rows -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- TAB 4: EVENT & LOGO SETTINGS -->
-                <div id="admin-tab-4" class="flex flex-col gap-6 hidden">
-                    <!-- Dynamic Logo Customization -->
-                    <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl flex flex-col gap-4">
-                        <h3 class="font-bold text-white text-base flex items-center gap-2">
-                            <i class="fa-solid fa-image text-bcel-yellow"></i> ຕັ້ງຄ່າໂລໂກ້ງານ (Custom Brand Logo)
-                        </h3>
-                        <p class="text-xs text-slate-400">ທ່ານສາມາດອັບໂຫຼດໄຟລ໌ໂລໂກ້ ທຄຕລ ຫຼື ໂລໂກ້ງານສະເພາະ ເພື່ອສະແດງໃນສ່ວນ Header, ວົງລໍ້ ແລະ ໜ້າປະກາດຜົນ</p>
-
-                        <div class="flex flex-col sm:flex-row items-center gap-6 pt-2">
-                            <div id="settings-logo-preview" class="w-24 h-24 rounded-2xl bg-white p-2 shadow-lg flex items-center justify-center overflow-hidden border-2 border-bcel-yellow/60">
-                                <!-- Dynamic Preview -->
+                <div id="contentSettings" class="space-y-6 hidden">
+                    
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-5">
+                        
+                        <!-- Event Titles -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-slate-300 block mb-1">ຊື່ງານ (Main Title):</label>
+                                <input type="text" id="settingEventTitle" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white font-bold focus:border-bcel-gold">
                             </div>
-                            <div class="flex flex-col gap-3 flex-1">
-                                <div class="flex flex-wrap items-center gap-3">
-                                    <label class="px-4 py-2.5 bg-bcel-red hover:bg-red-600 text-white font-bold text-xs rounded-xl cursor-pointer shadow transition flex items-center gap-2">
-                                        <i class="fa-solid fa-cloud-arrow-up"></i> ອັບໂຫຼດໄຟລ໌ໂລໂກ້ໃໝ່
-                                        <input type="file" id="logo-file-input" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
-                                    </label>
-                                    <button onclick="resetLogoToDefault()" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs rounded-xl transition">
-                                        ຣີເຊັດເປັນໂລໂກ້ BCEL ເດີມ
-                                    </button>
+                            <div>
+                                <label class="text-xs font-bold text-slate-300 block mb-1">ຄຳອະທິບາຍງານ (Subtitle):</label>
+                                <input type="text" id="settingEventSubtitle" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:border-bcel-gold">
+                            </div>
+                        </div>
+
+                        <!-- Admin Security PIN -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="text-xs font-bold text-slate-300 block mb-1">ລະຫັດຜ່ານ Admin PIN (4-6 ຫຼັກ):</label>
+                                <input type="text" id="settingAdminPin" maxlength="6" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-bcel-gold font-mono focus:border-bcel-gold">
+                            </div>
+                            
+                            <!-- Auto-remove Winner Toggle -->
+                            <div class="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-200 block">ລຶບຊື່ຜູ້ໄດ້ລາງວັນອອກອັດຕະໂນມັດ:</span>
+                                    <span class="text-[10px] text-slate-400">ເມື່ອໄດ້ລາງວັນແລ້ວ ບໍ່ໃຫ້ສຸ່ມໄດ້ຊ້ຳອີກ</span>
                                 </div>
-                                <p class="text-[11px] text-slate-500">ຮອງຮັບໄຟລ໌ PNG, JPG, SVG (ແນະນຳຂະໜາດສີ່ຫຼ່ຽມຈະຕຸລັດ ຫຼື ວົງມົນ)</p>
+                                <input type="checkbox" id="settingAutoRemoveWinner" class="w-5 h-5 accent-bcel-red cursor-pointer">
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Event Titles Settings -->
-                    <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-2xl flex flex-col gap-4">
-                        <h3 class="font-bold text-white text-base flex items-center gap-2">
-                            <i class="fa-solid fa-pen-to-square text-bcel-yellow"></i> ຕັ້ງຄ່າຊື່ງານ (Event Titles)
-                        </h3>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ຊື່ງານຫຼັກ (Event Title)</label>
-                                <input type="text" id="settings-title-input" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-bcel-yellow">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">ຊື່ງານຍ່ອຍ / ອົງກອນ (Subtitle)</label>
-                                <input type="text" id="settings-subtitle-input" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-bcel-yellow">
+                        <!-- Logo Customization -->
+                        <div class="border-t border-slate-800 pt-4 space-y-3">
+                            <label class="text-xs font-bold text-bcel-gold block">ອັບໂຫຼດ ໂລໂກ້ custom ( custom Logo Image ):</label>
+                            
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 bg-white rounded-xl p-1 border border-bcel-gold flex items-center justify-center overflow-hidden">
+                                    <img id="settingLogoPreview" src="" alt="Logo Preview" class="max-w-full max-h-full object-contain">
+                                </div>
+                                <div class="flex-1 space-y-2">
+                                    <input type="file" id="settingLogoFileInput" accept="image/*" onchange="handleLogoUpload(event)" class="text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-bcel-navy file:text-bcel-gold hover:file:bg-slate-800 cursor-pointer">
+                                    <div class="flex gap-2">
+                                        <button onclick="resetToDefaultLogo()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] rounded-lg border border-slate-700">
+                                            ໃຊ້ໂລໂກ້ BCEL ດັ້ງເດີມ
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex justify-end pt-2">
-                            <button onclick="saveEventTitles()" class="px-6 py-2.5 bg-bcel-red hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow transition">
-                                ບັນທຶກການຕັ້ງຄ່າຊື່ງານ
+
+                        <!-- Save Settings Button -->
+                        <div class="pt-4 flex justify-end">
+                            <button onclick="saveEventSettings()" class="bcel-btn-red text-white text-xs font-bold px-8 py-3 rounded-xl shadow-lg">
+                                ບັນທຶກການຕັ້ງຄ່າທັງໝົດ
                             </button>
                         </div>
+
                     </div>
 
-                    <!-- Reset Demo Data Zone -->
-                    <div class="bg-red-950/40 border border-red-900/50 p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div>
-                            <h4 class="font-bold text-red-200 text-sm">ຣີເຊັດຂໍ້ມູນທັງໝົດເປັນຄ່າເລີ່ມຕົ້ນ (Reset Demo Data)</h4>
-                            <p class="text-xs text-red-300/70">ລຶບຂໍ້ມູນປະຸບັນທັງໝົດ ແລະ ໂຫຼດຂໍ້ມູນຕົວຢ່າງ BCEL ຕົ້ນສະບັບໃໝ່</p>
-                        </div>
-                        <button onclick="resetAllDemoData()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition whitespace-nowrap">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> ຣີເຊັດຂໍ້ມູນ demo
-                        </button>
-                    </div>
                 </div>
 
             </div>
+
         </div>
     </div>
 
     <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
-        /* ----------------------------------------------------
-           DEFAULT ASSETS & CONSTANTS
-        ---------------------------------------------------- */
-        const DEFAULT_BCEL_LOGO_SVG = `
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-                <rect width="100" height="100" rx="20" fill="#E30613"/>
-                <!-- Champa Flower Petals -->
-                <circle cx="50" cy="50" r="14" fill="#FFEE00"/>
-                <ellipse cx="50" cy="24" rx="10" ry="16" fill="#FFFFFF"/>
-                <ellipse cx="50" cy="76" rx="10" ry="16" fill="#FFFFFF"/>
-                <ellipse cx="24" cy="50" rx="16" ry="10" fill="#FFFFFF"/>
-                <ellipse cx="76" cy="50" rx="16" ry="10" fill="#FFFFFF"/>
-                <ellipse cx="31.6" cy="31.6" rx="12" ry="12" fill="#FFFFFF"/>
-                <ellipse cx="68.4" cy="68.4" rx="12" ry="12" fill="#FFFFFF"/>
-                <ellipse cx="31.6" cy="68.4" rx="12" ry="12" fill="#FFFFFF"/>
-                <ellipse cx="68.4" cy="31.6" rx="12" ry="12" fill="#FFFFFF"/>
-                <circle cx="50" cy="50" r="10" fill="#E30613"/>
-                <text x="50" y="54" font-family="sans-serif" font-weight="900" font-size="8" fill="#FFFFFF" text-anchor="middle">BCEL</text>
-            </svg>
-        `;
+        /* --- SUPABASE CONFIGURATION (REST API) --- */
+        const SUPABASE_URL = "https://ydwguxhwrxtitpavyuoy.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_w2xsr2P3QGO84bMt1VUIVA_hT_DNeHC";
+        const SUPABASE_TABLE = "lucky_draw_state";
+        const MAIN_EVENT_ID = "main_event";
 
-        const DEFAULT_DEMO_PRIZES = [
-            {
-                id: 'prize-1',
-                title: 'iPhone 15 Pro Max 256GB',
-                rank: 'ລາງວັນທີ 1',
-                count: 1,
-                remaining: 1,
-                desc: 'ສະໜັບສະໜູນໂດຍ ທຄຕລ ສູນໃຫຍ່',
-                img: 'https://placehold.co/200x200/E30613/FFFFFF?text=iPhone+15'
-            },
-            {
-                id: 'prize-2',
-                title: 'iPad Air 5 M1',
-                rank: 'ລາງວັນທີ 2',
-                count: 2,
-                remaining: 2,
-                desc: 'ແທັບເລັດສຳລັບການເຮັດວຽກ',
-                img: 'https://placehold.co/200x200/1B1B65/FFFFFF?text=iPad+Air'
-            },
-            {
-                id: 'prize-3',
-                title: 'ລາງວັນເງິນສົດ 1,000,000 ກີບ',
-                rank: 'ລາງວັນທີ 3',
-                count: 5,
-                remaining: 5,
-                desc: 'ໂອນເຂົ້າບັນຊີ BCEL One ທັນທີ',
-                img: 'https://placehold.co/200x200/FFEE00/1B1B65?text=1,000,000+Kip'
-            },
-            {
-                id: 'prize-4',
-                title: 'ໝວກສວນ & ເສື້ອຢືດ BCEL',
-                rank: 'ລາງວັນຊົມເຊີຍ',
-                count: 10,
-                remaining: 10,
-                desc: 'ຂອງຂວັນທີ່ລະນຶກຈາກ BCEL',
-                img: 'https://placehold.co/200x200/E30613/FFEE00?text=BCEL+Merch'
-            }
-        ];
+        // Default BCEL Logo (Inline SVG Data URI)
+        const DEFAULT_BCEL_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23E30613'/><path d='M20 25 L80 25 L80 40 L45 40 L45 45 L75 45 L75 60 L45 60 L45 65 L80 65 L80 80 L20 80 Z' fill='%23FFFFFF'/><circle cx='80' cy='32.5' r='4' fill='%23FFEE00'/></svg>";
 
-        /* ----------------------------------------------------
-           APPLICATION STATE
-        ---------------------------------------------------- */
+        // Global State Object
         let state = {
-            eventTitle: "ງານລຸ້ນຮັບລາງວັນ BCEL Lucky Draw 2026",
-            eventSubtitle: "ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ (BCEL)",
-            logoUrl: "", // Empty string means default SVG logo
-            mode: "slot", // "slot" or "wheel"
-            soundEnabled: true,
-            excludeWinners: true,
-            selectedPrizeId: null,
-            participants: [],
-            prizes: [],
+            eventTitle: "BCEL LUCKY DRAW 2026",
+            eventSubtitle: "ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ - ງານສຸ່ມລາງວັນຜູ້ໂຊກດີ",
+            adminPin: "1234",
+            autoRemoveWinner: true,
+            customLogo: DEFAULT_BCEL_LOGO,
+            soundMuted: false,
+            prizes: [
+                { id: "p1", title: "iPhone 15 Pro Max", quota: 2, image: "", color: "#E30613" },
+                { id: "p2", title: "iPad Air 5", quota: 3, image: "", color: "#1B1B65" },
+                { id: "p3", title: "Smart TV 55 Inch", quota: 5, image: "", color: "#D4AF37" }
+            ],
+            participants: [
+                { code: "BCEL-001", name: "ທ່ານ ສົມໄຊ ໄຊຍະວົງ", dept: "ພະແນກ ເທັກໂນໂລຊີ" },
+                { code: "BCEL-002", name: "ທ່ານ ມະນີວອນ ດວງດີ", dept: "ພະແນກ ບັນຊີ" },
+                { code: "BCEL-003", name: "ທ່ານ ທອງດຳ ພັນທະວົງ", dept: "ສາຂາ ລ້ານຊ້າງ" },
+                { code: "BCEL-004", name: "ທ່ານ ນາງ ສຸພາພອນ ລັດຕະນະ", dept: "ພະແນກ ການເງິນ" },
+                { code: "BCEL-005", name: "ທ່ານ ວິໄລສັກ ພົມມະຈັນ", dept: "ພະແນກ ສິນເຊື່ອ" }
+            ],
             winners: [],
-            editingPrizeId: null
+            activePrizeId: "p1"
         };
 
-        // Animation state trackers
+        // Runtime variables
         let isSpinning = false;
-        let slotInterval = null;
-        let pendingWinner = null;
-
-        /* ----------------------------------------------------
-           WEB AUDIO API SOUND SYNTHESIZER
-        ---------------------------------------------------- */
+        let slotAnimInterval = null;
+        let activeDrawMode = 'slot'; // 'slot' or 'wheel'
+        let currentCandidateWinner = null;
         let audioCtx = null;
 
-        function getAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
-        }
-
-        function playTickSound() {
-            if (!state.soundEnabled) return;
-            try {
-                const ctx = getAudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(440, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.04);
-
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.04);
-
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-
-                osc.start();
-                osc.stop(ctx.currentTime + 0.05);
-            } catch (e) { console.log(e); }
-        }
-
-        function playVictorySound() {
-            if (!state.soundEnabled) return;
-            try {
-                const ctx = getAudioContext();
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    
-                    const startTime = ctx.currentTime + idx * 0.12;
-                    gain.gain.setValueAtTime(0.3, startTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.6);
-                    
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    
-                    osc.start(startTime);
-                    osc.stop(startTime + 0.6);
-                });
-            } catch (e) { console.log(e); }
-        }
-
-        function toggleSound() {
-            state.soundEnabled = !state.soundEnabled;
-            saveState();
-            updateSoundUI();
-        }
-
-        function updateSoundUI() {
-            const btn = document.getElementById('sound-btn');
-            const icon = document.getElementById('sound-icon');
-            if (state.soundEnabled) {
-                icon.className = 'fa-solid fa-volume-high text-bcel-yellow';
+        /* --- CLOUD DATABASE SYNC FUNCTIONS --- */
+        function updateSyncBadge(status, text) {
+            const badge = document.getElementById('syncBadge');
+            const icon = document.getElementById('syncIcon');
+            const textSpan = document.getElementById('syncText');
+            
+            textSpan.textContent = text;
+            if (status === 'synced') {
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-300 border border-emerald-500/40 shadow-inner";
+                icon.className = "fa-solid fa-cloud-check text-emerald-400";
+            } else if (status === 'syncing') {
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-950 text-amber-300 border border-amber-500/40 shadow-inner";
+                icon.className = "fa-solid fa-cloud-arrow-up animate-bounce text-amber-400";
             } else {
-                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+                icon.className = "fa-solid fa-cloud text-slate-400";
             }
         }
 
-        /* ----------------------------------------------------
-           PERSISTENCE & INITIALIZATION
-        ---------------------------------------------------- */
-        function loadState() {
-            const saved = localStorage.getItem('bcel_lucky_draw_state');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed };
-                } catch (e) {
-                    console.error("Failed to parse state", e);
+        async function loadStateFromSupabase() {
+            updateSyncBadge('syncing', 'ກຳລັງດຶງຂໍ້ມູນ...');
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?id=eq.${MAIN_EVENT_ID}&select=data`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                const rows = await res.json();
+
+                if (rows && rows.length > 0 && rows[0].data && Object.keys(rows[0].data).length > 0) {
+                    state = { ...state, ...rows[0].data };
+                    saveStateToLocal(state);
+                    updateSyncBadge('synced', 'Cloud Synced ✓');
+                } else {
+                    // Initial seed if cloud empty
+                    saveStateToLocal(state);
+                    await saveStateToSupabase(state);
                 }
+            } catch (err) {
+                console.warn("Supabase fetch failed, loading from localStorage:", err);
+                loadStateFromLocal();
+                updateSyncBadge('offline', 'Offline Mode');
             }
+            renderAll();
+        }
 
-            // Fallback default setup if empty
-            if (!state.prizes || state.prizes.length === 0) {
-                state.prizes = JSON.parse(JSON.stringify(DEFAULT_DEMO_PRIZES));
-            }
-            if (!state.participants || state.participants.length === 0) {
-                generateDemoParticipants(25, false);
-            }
+        async function saveStateToSupabase(dataToSave) {
+            updateSyncBadge('syncing', 'ກຳລັງບັນທຶກ...');
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'resolution=merge-duplicates'
+                    },
+                    body: JSON.stringify({
+                        id: MAIN_EVENT_ID,
+                        data: dataToSave,
+                        updated_at: new Date().toISOString()
+                    })
+                });
 
-            if (!state.selectedPrizeId && state.prizes.length > 0) {
-                state.selectedPrizeId = state.prizes[0].id;
+                if (!res.ok) throw new Error(`Upsert error ${res.status}`);
+                updateSyncBadge('synced', 'Cloud Synced ✓');
+            } catch (err) {
+                console.warn("Supabase save failed:", err);
+                updateSyncBadge('offline', 'Offline / ບັນທຶກໃນເຄື່ອງ');
             }
+        }
+
+        function saveStateToLocal(data) {
+            try {
+                localStorage.setItem('bcel_lucky_draw_cloud_app', JSON.stringify(data));
+            } catch (e) {}
+        }
+
+        function loadStateFromLocal() {
+            try {
+                const local = localStorage.getItem('bcel_lucky_draw_cloud_app');
+                if (local) {
+                    state = { ...state, ...JSON.parse(local) };
+                }
+            } catch (e) {}
         }
 
         function saveState() {
-            localStorage.setItem('bcel_lucky_draw_state', JSON.stringify(state));
+            saveStateToLocal(state);
+            saveStateToSupabase(state);
         }
 
-        window.onload = function () {
-            loadState();
-            renderAll();
-        };
+        function manualRefreshCloud() {
+            loadStateFromSupabase();
+        }
 
-        function renderAll() {
-            renderBranding();
-            renderPrizeSelector();
-            renderStageInfo();
-            updateSoundUI();
-            if (state.mode === 'wheel') {
-                drawWheel();
+        /* --- AUDIO SYNTHESIZER --- */
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
-        /* ----------------------------------------------------
-           BRANDING & DYNAMIC LOGO RENDER
-        ---------------------------------------------------- */
-        function renderBranding() {
-            // Header Titles
-            document.getElementById('header-event-title').innerText = state.eventTitle;
-            document.getElementById('header-event-subtitle').innerText = state.eventSubtitle;
-
-            // Logos
-            const headerContainer = document.getElementById('header-logo-container');
-            const winnerContainer = document.getElementById('winner-logo-container');
-            const settingsPreview = document.getElementById('settings-logo-preview');
-
-            const logoHtml = state.logoUrl 
-                ? `<img src="${state.logoUrl}" alt="BCEL Logo" class="w-full h-full object-contain">`
-                : DEFAULT_BCEL_LOGO_SVG;
-
-            headerContainer.innerHTML = logoHtml;
-            winnerContainer.innerHTML = logoHtml;
-            settingsPreview.innerHTML = logoHtml;
-
-            // Admin tab settings inputs
-            document.getElementById('settings-title-input').value = state.eventTitle;
-            document.getElementById('settings-subtitle-input').value = state.eventSubtitle;
-            document.getElementById('exclude-winners-toggle').checked = state.excludeWinners;
+        function playTickSound() {
+            if (state.soundMuted) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440 + Math.random() * 200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {}
         }
 
-        function handleLogoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = new Image();
-                img.onload = function () {
-                    // Canvas resize for compressed storage
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const maxDim = 256;
-                    let w = img.width, h = img.height;
-
-                    if (w > h) {
-                        if (w > maxDim) { h *= maxDim / w; w = maxDim; }
-                    } else {
-                        if (h > maxDim) { w *= maxDim / h; h = maxDim; }
-                    }
-
-                    canvas.width = w;
-                    canvas.height = h;
-                    ctx.drawImage(img, 0, 0, w, h);
-
-                    state.logoUrl = canvas.toDataURL('image/png');
-                    saveState();
-                    renderBranding();
-                    if (state.mode === 'wheel') drawWheel();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        function playVictorySound() {
+            if (state.soundMuted) return;
+            try {
+                initAudio();
+                const notes = [261.63, 329.63, 392.00, 523.25];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.12 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + idx * 0.12);
+                    osc.stop(audioCtx.currentTime + idx * 0.12 + 0.3);
+                });
+            } catch (e) {}
         }
 
-        function resetLogoToDefault() {
-            state.logoUrl = "";
+        function toggleSound() {
+            state.soundMuted = !state.soundMuted;
+            const btn = document.getElementById('soundIcon');
+            btn.className = state.soundMuted ? "fa-solid fa-volume-xmark text-slate-500" : "fa-solid fa-volume-high text-bcel-gold";
             saveState();
-            renderBranding();
-            if (state.mode === 'wheel') drawWheel();
         }
 
-        function saveEventTitles() {
-            state.eventTitle = document.getElementById('settings-title-input').value.trim() || "ງານລຸ້ນຮັບລາງວັນ BCEL Lucky Draw 2026";
-            state.eventSubtitle = document.getElementById('settings-subtitle-input').value.trim() || "ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ (BCEL)";
-            saveState();
-            renderBranding();
-            alert("ບັນທຶກການຕັ້ງຄ່າຊື່ງານຮຽບຮ້ອຍແລ້ວ!");
+        /* --- RENDER ALL UI ELEMENTS --- */
+        function renderAll() {
+            // Titles & Branding
+            document.getElementById('displayEventTitle').textContent = state.eventTitle || "BCEL LUCKY DRAW 2026";
+            document.getElementById('displayEventSubtitle').textContent = state.eventSubtitle || "";
+            document.getElementById('settingEventTitle').value = state.eventTitle || "";
+            document.getElementById('settingEventSubtitle').value = state.eventSubtitle || "";
+            document.getElementById('settingAdminPin').value = state.adminPin || "1234";
+            document.getElementById('settingAutoRemoveWinner').checked = !!state.autoRemoveWinner;
+
+            const logoSrc = state.customLogo || DEFAULT_BCEL_LOGO;
+            document.getElementById('headerLogoImg').src = logoSrc;
+            document.getElementById('wheelCenterLogo').src = logoSrc;
+            document.getElementById('winnerModalLogo').src = logoSrc;
+            document.getElementById('settingLogoPreview').src = logoSrc;
+
+            // Render Prize Selector Pills
+            renderPrizeSelector();
+            
+            // Render Recent Winners & Counts
+            renderRecentWinners();
+
+            // Render Admin Tables
+            renderParticipantsTable();
+            renderAdminPrizesGrid();
+            renderWinnersTable();
+
+            // Render Wheel Canvas if active mode
+            if (activeDrawMode === 'wheel') {
+                drawWheelCanvas();
+            }
         }
 
-        /* ----------------------------------------------------
-           PRIZE SELECTOR & ACTIVE PRIZE MANAGEMENT
-        ---------------------------------------------------- */
         function renderPrizeSelector() {
-            const select = document.getElementById('active-prize-select');
-            select.innerHTML = '';
+            const container = document.getElementById('prizeSelectorContainer');
+            container.innerHTML = '';
 
-            state.prizes.forEach(prize => {
-                const opt = document.createElement('option');
-                opt.value = prize.id;
-                opt.text = `${prize.rank ? prize.rank + ': ' : ''}${prize.title} (ເຫຼືອ: ${prize.remaining}/${prize.count})`;
-                if (prize.id === state.selectedPrizeId) opt.selected = true;
-                select.appendChild(opt);
+            if (state.prizes.length === 0) {
+                container.innerHTML = '<span class="text-xs text-red-400">ຍັງບໍ່ມີລາງວັນ</span>';
+                return;
+            }
+
+            // Validate active prize
+            if (!state.prizes.find(p => p.id === state.activePrizeId)) {
+                state.activePrizeId = state.prizes[0].id;
+            }
+
+            state.prizes.forEach(p => {
+                const wonCount = state.winners.filter(w => w.prizeId === p.id).length;
+                const remaining = Math.max(0, p.quota - wonCount);
+                const isActive = p.id === state.activePrizeId;
+
+                const btn = document.createElement('button');
+                btn.onclick = () => selectActivePrize(p.id);
+                btn.className = `px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-2 border ${
+                    isActive 
+                    ? 'bg-bcel-red text-white border-bcel-gold shadow-md' 
+                    : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
+                }`;
+
+                btn.innerHTML = `
+                    <span>${escapeHtml(p.title)}</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] ${remaining > 0 ? 'bg-slate-950 text-bcel-gold' : 'bg-slate-800 text-slate-500'}">
+                        ${remaining}/${p.quota}
+                    </span>
+                `;
+                container.appendChild(btn);
             });
 
-            const activePrize = getActivePrize();
-            const summaryBox = document.getElementById('active-prize-card');
-            
-            if (activePrize) {
-                summaryBox.innerHTML = `
-                    <img src="${activePrize.img}" class="w-9 h-9 rounded-lg object-contain bg-slate-800 p-1 border border-slate-700" alt="${activePrize.title}">
-                    <div class="text-right">
-                        <div class="text-xs font-bold text-white">${activePrize.title}</div>
-                        <div class="text-[11px] text-bcel-yellow">ຈຳນວນເຫຼືອ: <strong>${activePrize.remaining}</strong> / ${activePrize.count}</div>
-                    </div>
-                `;
-            } else {
-                summaryBox.innerHTML = `<span class="text-xs text-slate-400">ກະລຸນາເພີ່ມຂອງລາງວັນ</span>`;
+            // Update main Active Prize Banner
+            const activeP = state.prizes.find(p => p.id === state.activePrizeId);
+            if (activeP) {
+                const wonCount = state.winners.filter(w => w.prizeId === activeP.id).length;
+                document.getElementById('activePrizeNameDisplay').textContent = activeP.title;
+                document.getElementById('activePrizeQuotaDisplay').textContent = Math.max(0, activeP.quota - wonCount);
+                document.getElementById('activePrizeTotalDisplay').textContent = activeP.quota;
             }
         }
 
-        function getActivePrize() {
-            return state.prizes.find(p => p.id === state.selectedPrizeId) || state.prizes[0] || null;
-        }
-
-        function changeActivePrize(prizeId) {
-            state.selectedPrizeId = prizeId;
-            saveState();
+        function selectActivePrize(prizeId) {
+            state.activePrizeId = prizeId;
             renderPrizeSelector();
-            renderStageInfo();
-            if (state.mode === 'wheel') drawWheel();
-        }
-
-        /* ----------------------------------------------------
-           STAGE & MODE SWITCHING
-        ---------------------------------------------------- */
-        function switchMode(newMode) {
-            state.mode = newMode;
             saveState();
-
-            const slotBtn = document.getElementById('mode-slot-btn');
-            const wheelBtn = document.getElementById('mode-wheel-btn');
-            const slotStage = document.getElementById('stage-slot');
-            const wheelStage = document.getElementById('stage-wheel');
-
-            if (newMode === 'slot') {
-                slotBtn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-bcel-red text-white shadow-md font-bold";
-                wheelBtn.className = "px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center gap-1.5 font-medium";
-                slotStage.classList.remove('hidden');
-                wheelStage.classList.add('hidden');
-            } else {
-                wheelBtn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 bg-bcel-red text-white shadow-md font-bold";
-                slotBtn.className = "px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center gap-1.5 font-medium";
-                wheelStage.classList.remove('hidden');
-                slotStage.classList.add('hidden');
-                drawWheel();
-            }
         }
 
         function getEligibleParticipants() {
-            if (!state.excludeWinners) {
+            if (!state.autoRemoveWinner) {
                 return state.participants;
             }
-            return state.participants.filter(p => !p.won);
+            const wonCodes = new Set(state.winners.map(w => w.code));
+            return state.participants.filter(p => !wonCodes.has(p.code));
         }
 
-        function renderStageInfo() {
-            const eligible = getEligibleParticipants();
-            document.getElementById('slot-total-count').innerText = state.participants.length;
-            document.getElementById('slot-eligible-count').innerText = eligible.length;
-        }
+        function renderRecentWinners() {
+            const list = document.getElementById('recentWinnersList');
+            list.innerHTML = '';
 
-        /* ----------------------------------------------------
-           MODE 1: AUTOMATED SLOT MACHINE
-        ---------------------------------------------------- */
-        function startSlotSpin() {
-            if (isSpinning) return;
+            document.getElementById('participantCountBadge').textContent = `${state.participants.length} ຄົນ`;
+            
+            const totalQuota = state.prizes.reduce((sum, p) => sum + Number(p.quota), 0);
+            const totalWon = state.winners.length;
+            document.getElementById('totalWonCount').textContent = totalWon;
+            document.getElementById('totalRemainingCount').textContent = Math.max(0, totalQuota - totalWon);
 
-            const activePrize = getActivePrize();
-            if (!activePrize || activePrize.remaining <= 0) {
-                alert("ຂອງລາງວັນນີ້ຖືກສຸ່ມໝົດແລ້ວ! ກະລຸນາເລືອກລາງວັນອື່ນ");
+            if (state.winners.length === 0) {
+                list.innerHTML = '<div class="text-center py-8 text-xs text-slate-500">ຍັງບໍ່ມີຜູ້ໄດ້ລາງວັນ</div>';
                 return;
             }
+
+            // Show top 5 latest winners
+            const latest = [...state.winners].reverse().slice(0, 5);
+            latest.forEach(w => {
+                const p = state.prizes.find(pr => pr.id === w.prizeId);
+                const prizeName = p ? p.title : 'ລາງວັນ';
+                
+                const card = document.createElement('div');
+                card.className = "bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs";
+                card.innerHTML = `
+                    <div class="truncate mr-2">
+                        <div class="font-bold text-slate-200 truncate">${escapeHtml(w.name)}</div>
+                        <div class="text-[10px] text-bcel-gold font-mono truncate">${escapeHtml(prizeName)}</div>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-mono shrink-0">${escapeHtml(w.code || '')}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        /* --- SLOT MACHINE DRAW LOGIC --- */
+        function switchDrawMode(mode) {
+            activeDrawMode = mode;
+            const slotView = document.getElementById('slotMachineView');
+            const wheelView = document.getElementById('luckyWheelView');
+            const tabSlot = document.getElementById('tabModeSlot');
+            const tabWheel = document.getElementById('tabModeWheel');
+
+            if (mode === 'slot') {
+                slotView.classList.remove('hidden');
+                wheelView.classList.add('hidden');
+                tabSlot.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 bg-bcel-red text-white shadow-md";
+                tabWheel.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-400 hover:text-white";
+            } else {
+                slotView.classList.add('hidden');
+                wheelView.classList.remove('hidden');
+                tabWheel.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 bg-bcel-red text-white shadow-md";
+                tabSlot.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-400 hover:text-white";
+                drawWheelCanvas();
+            }
+        }
+
+        function startSlotDraw() {
+            if (isSpinning) return;
 
             const eligible = getEligibleParticipants();
             if (eligible.length === 0) {
-                alert("ບໍ່ມີລາຍຊື່ຜູ້ມີສິດສຸ່ມเหลือຢູ່!");
+                alert("ບໍ່ມີລາຍຊື່ຜູ້ເຂົ້າຮ່ວມ ຫຼື ທຸກຄົນໄດ້ລາງວັນໝົດແລ້ວ!");
                 return;
             }
 
+            const activePrize = state.prizes.find(p => p.id === state.activePrizeId);
+            if (!activePrize) {
+                alert("ກະລຸນາເລືອກລາງວັນກ່ອນ!");
+                return;
+            }
+
+            const wonCount = state.winners.filter(w => w.prizeId === activePrize.id).length;
+            if (wonCount >= activePrize.quota) {
+                alert(`ລາງວັນ "${activePrize.title}" ແຈກຄົບໂຄຕ້າແລ້ວ!`);
+                return;
+            }
+
+            // Pick winner randomly
+            const winnerIdx = Math.floor(Math.random() * eligible.length);
+            currentCandidateWinner = eligible[winnerIdx];
+
             isSpinning = true;
-            document.getElementById('slot-spin-btn').disabled = true;
-            document.getElementById('slot-spin-btn').classList.add('opacity-50');
+            document.getElementById('startSpinBtn').disabled = true;
+            document.getElementById('startSpinBtn').classList.add('opacity-50');
 
-            // Pick winner beforehand
-            const randomIndex = Math.floor(Math.random() * eligible.length);
-            pendingWinner = eligible[randomIndex];
-
-            let speed = 40; // ms per tick
+            let speed = 40; // ms
             let counter = 0;
-            const totalDurationTicks = 60; // total steps
+            const maxTicks = 45; // total cycles before stopping
 
-            slotInterval = setInterval(() => {
+            slotAnimInterval = setInterval(() => {
                 counter++;
-                const tempIndex = Math.floor(Math.random() * eligible.length);
-                const tempP = eligible[tempIndex];
-
-                document.getElementById('slot-code').innerText = tempP.code;
-                document.getElementById('slot-name').innerText = tempP.name;
-                document.getElementById('slot-dept').innerText = tempP.dept || 'ທຄຕລ';
-
+                const randomSample = eligible[Math.floor(Math.random() * eligible.length)];
+                
+                document.getElementById('slotReelCode').textContent = randomSample.code || 'BCEL-???';
+                document.getElementById('slotReelName').textContent = randomSample.name;
+                document.getElementById('slotReelDept').textContent = randomSample.dept || '---';
+                
                 playTickSound();
 
-                if (counter > totalDurationTicks - 15) {
-                    // Decelerate
-                    speed += 15;
-                }
+                if (counter > maxTicks) {
+                    clearInterval(slotAnimInterval);
+                    // Final stop on winner
+                    document.getElementById('slotReelCode').textContent = currentCandidateWinner.code || 'BCEL-000';
+                    document.getElementById('slotReelName').textContent = currentCandidateWinner.name;
+                    document.getElementById('slotReelDept').textContent = currentCandidateWinner.dept || '---';
 
-                if (counter >= totalDurationTicks) {
-                    clearInterval(slotInterval);
-                    // Lock final winner
-                    document.getElementById('slot-code').innerText = pendingWinner.code;
-                    document.getElementById('slot-name').innerText = pendingWinner.name;
-                    document.getElementById('slot-dept').innerText = pendingWinner.dept || 'ທຄຕລ';
+                    isSpinning = false;
+                    document.getElementById('startSpinBtn').disabled = false;
+                    document.getElementById('startSpinBtn').classList.remove('opacity-50');
 
                     setTimeout(() => {
-                        showWinnerModal(pendingWinner, activePrize);
-                        isSpinning = false;
-                        document.getElementById('slot-spin-btn').disabled = false;
-                        document.getElementById('slot-spin-btn').classList.remove('opacity-50');
-                    }, 500);
+                        triggerWinnerReveal(currentCandidateWinner, activePrize);
+                    }, 400);
                 }
             }, speed);
         }
 
-        /* ----------------------------------------------------
-           MODE 2: HTML5 CANVAS LUCKY WHEEL
-        ---------------------------------------------------- */
+        /* --- LUCKY WHEEL CANVAS LOGIC --- */
         let wheelRotation = 0;
-
-        function drawWheel() {
-            const canvas = document.getElementById('wheel-canvas');
+        function drawWheelCanvas() {
+            const canvas = document.getElementById('wheelCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const eligible = getEligibleParticipants();
+            
+            const numSlices = eligible.length > 0 ? Math.min(eligible.length, 12) : 6;
+            const sliceAngle = (2 * Math.PI) / numSlices;
+            const colors = ['#E30613', '#1B1B65', '#D4AF37', '#0F766E', '#7C3AED', '#C026D3', '#0284C7'];
 
-            const width = canvas.width;
-            const height = canvas.height;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const radius = width / 2 - 10;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const radius = cx - 5;
 
-            ctx.clearRect(0, 0, width, height);
-
-            if (eligible.length === 0) {
-                ctx.fillStyle = '#1e293b';
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 16px "Noto Sans Lao"';
-                ctx.textAlign = 'center';
-                ctx.fillText('ບໍ່ມີລາຍຊື່ຜູ້ມີສິດ', centerX, centerY);
-                return;
-            }
-
-            const numSlices = eligible.length;
-            const sliceAngle = (Math.PI * 2) / numSlices;
-            const colors = ['#E30613', '#1B1B65', '#FFFFFF', '#FFEE00'];
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(wheelRotation);
 
             for (let i = 0; i < numSlices; i++) {
-                const angle = wheelRotation + i * sliceAngle;
+                const angle = i * sliceAngle;
                 ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
-                ctx.closePath();
-
-                const colIndex = i % colors.length;
-                ctx.fillStyle = colors[colIndex];
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, radius, angle, angle + sliceAngle);
+                ctx.fillStyle = colors[i % colors.length];
                 ctx.fill();
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#FFEE00';
                 ctx.stroke();
 
-                // Slice Text
+                // Draw Text
                 ctx.save();
-                ctx.translate(centerX, centerY);
                 ctx.rotate(angle + sliceAngle / 2);
-                ctx.textAlign = 'right';
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "bold 13px Noto Sans Lao, sans-serif";
                 
-                // Text color contrast
-                if (colors[colIndex] === '#FFFFFF' || colors[colIndex] === '#FFEE00') {
-                    ctx.fillStyle = '#0f172a';
-                } else {
-                    ctx.fillStyle = '#ffffff';
-                }
-                ctx.font = 'bold 12px "Noto Sans Lao"';
-                
-                const participant = eligible[i];
-                const displayName = participant.name.length > 12 ? participant.name.substring(0, 10) + '..' : participant.name;
-                ctx.fillText(`${displayName} (${participant.code})`, radius - 15, 4);
+                const text = eligible[i] ? eligible[i].name : `ລາຍຊື່ ${i+1}`;
+                ctx.fillText(text.length > 12 ? text.substring(0, 10) + '...' : text, radius - 20, 5);
                 ctx.restore();
             }
 
-            // Center Hub with Dynamic Logo
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 42, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-            ctx.strokeStyle = '#FFEE00';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            ctx.fillStyle = '#E30613';
-            ctx.font = 'black 14px "Plus Jakarta Sans"';
-            ctx.textAlign = 'center';
-            ctx.fillText('BCEL', centerX, centerY + 5);
+            ctx.restore();
         }
 
-        function startWheelSpin() {
+        function spinLuckyWheel() {
             if (isSpinning) return;
-
-            const activePrize = getActivePrize();
-            if (!activePrize || activePrize.remaining <= 0) {
-                alert("ຂອງລາງວັນນີ້ຖືກສຸ່ມໝົດແລ້ວ!");
-                return;
-            }
 
             const eligible = getEligibleParticipants();
             if (eligible.length === 0) {
-                alert("ບໍ່ມີລາຍຊື່ຜູ້ມີສິດສຸ່ມ!");
+                alert("ບໍ່ມີລາຍຊື່ຜູ້ເຂົ້າຮ່ວມ!");
+                return;
+            }
+
+            const activePrize = state.prizes.find(p => p.id === state.activePrizeId);
+            if (!activePrize) {
+                alert("ກະລຸນາເລືອກລາງວັນກ່ອນ!");
                 return;
             }
 
             isSpinning = true;
-            document.getElementById('wheel-spin-btn').disabled = true;
+            document.getElementById('spinWheelBtn').disabled = true;
 
             const winnerIdx = Math.floor(Math.random() * eligible.length);
-            pendingWinner = eligible[winnerIdx];
+            currentCandidateWinner = eligible[winnerIdx];
 
-            const sliceAngle = (Math.PI * 2) / eligible.length;
+            // Calculate rotation target
+            const extraRounds = 5 + Math.floor(Math.random() * 3);
+            const targetRotation = wheelRotation + (extraRounds * 2 * Math.PI) + Math.random() * Math.PI * 2;
             
-            // Calculate final rotation so pointer at top (-Math.PI/2) lands inside winner slice
-            const targetSliceAngle = (eligible.length - winnerIdx - 0.5) * sliceAngle;
-            const totalRotations = (5 + Math.floor(Math.random() * 3)) * (Math.PI * 2);
-            const targetRotation = wheelRotation + totalRotations + (targetSliceAngle - (wheelRotation % (Math.PI * 2)));
-
+            let startTime = null;
             const duration = 4500; // ms
-            const start = performance.now();
-            const startRot = wheelRotation;
 
-            let lastSliceIndex = -1;
-
-            function animateWheel(now) {
-                const elapsed = now - start;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                // Ease out cubic
-                const easeOut = 1 - Math.pow(1 - progress, 3);
-                wheelRotation = startRot + (targetRotation - startRot) * easeOut;
-
-                drawWheel();
-
-                // Sound ticks as slices pass pointer
-                const currentSliceIndex = Math.floor(((wheelRotation + Math.PI / 2) % (Math.PI * 2)) / sliceAngle);
-                if (currentSliceIndex !== lastSliceIndex) {
-                    playTickSound();
-                    lastSliceIndex = currentSliceIndex;
-                }
+            function animateWheel(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = (timestamp - startTime) / duration;
 
                 if (progress < 1) {
+                    // Ease out cubic
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    wheelRotation = targetRotation * easeOut;
+                    drawWheelCanvas();
+                    playTickSound();
                     requestAnimationFrame(animateWheel);
                 } else {
+                    wheelRotation = targetRotation;
+                    drawWheelCanvas();
                     isSpinning = false;
-                    document.getElementById('wheel-spin-btn').disabled = false;
+                    document.getElementById('spinWheelBtn').disabled = false;
+                    
                     setTimeout(() => {
-                        showWinnerModal(pendingWinner, activePrize);
+                        triggerWinnerReveal(currentCandidateWinner, activePrize);
                     }, 300);
                 }
             }
@@ -1161,201 +1150,121 @@
             requestAnimationFrame(animateWheel);
         }
 
-        /* ----------------------------------------------------
-           WINNER CELEBRATION & CONFETTI
-        ---------------------------------------------------- */
-        function showWinnerModal(winner, prize) {
-            document.getElementById('winner-prize-title').innerText = `${prize.rank ? prize.rank + ' - ' : ''}${prize.title}`;
-            document.getElementById('winner-prize-img').src = prize.img;
-            document.getElementById('winner-code').innerText = winner.code;
-            document.getElementById('winner-name').innerText = winner.name;
-            document.getElementById('winner-dept').innerText = winner.dept || 'ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ';
-
-            const modal = document.getElementById('winner-modal');
-            const card = document.getElementById('winner-card');
-
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            card.classList.remove('scale-90');
-            card.classList.add('scale-100');
-
+        /* --- WINNER REVEAL & CONFETTI --- */
+        function triggerWinnerReveal(winner, prize) {
             playVictorySound();
-            startConfetti();
+            
+            // Fire Confetti
+            try {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            } catch (e) {}
+
+            document.getElementById('winnerPrizeTitle').textContent = prize.title;
+            document.getElementById('winnerPrizeDetail').textContent = `ໂຄຕ້າ: ${prize.quota} ລາງວັນ`;
+            document.getElementById('winnerCode').textContent = `CODE: ${winner.code || 'BCEL-WIN'}`;
+            document.getElementById('winnerName').textContent = winner.name;
+            document.getElementById('winnerDept').textContent = winner.dept || 'ພະແນກ / ສາຂາ';
+
+            document.getElementById('winnerModal').classList.remove('hidden');
         }
 
-        function respinWinner() {
-            closeWinnerModal();
-            if (state.mode === 'slot') {
-                startSlotSpin();
-            } else {
-                startWheelSpin();
+        function confirmAndSaveWinner() {
+            if (currentCandidateWinner && state.activePrizeId) {
+                const winnerRecord = {
+                    id: "win_" + Date.now(),
+                    prizeId: state.activePrizeId,
+                    code: currentCandidateWinner.code || '',
+                    name: currentCandidateWinner.name,
+                    dept: currentCandidateWinner.dept || '',
+                    wonAt: new Date().toISOString()
+                };
+
+                state.winners.push(winnerRecord);
+                saveState();
+                renderAll();
             }
-        }
-
-        function confirmWinner() {
-            if (!pendingWinner) return;
-
-            const activePrize = getActivePrize();
-            if (activePrize && activePrize.remaining > 0) {
-                activePrize.remaining -= 1;
-            }
-
-            // Mark participant won
-            const participant = state.participants.find(p => p.id === pendingWinner.id || p.code === pendingWinner.code);
-            if (participant) {
-                participant.won = true;
-            }
-
-            // Record Winner
-            state.winners.unshift({
-                id: 'w-' + Date.now(),
-                timestamp: new Date().toLocaleString('lo-LA'),
-                prizeTitle: activePrize ? activePrize.title : 'ລາງວັນ',
-                code: pendingWinner.code,
-                name: pendingWinner.name,
-                dept: pendingWinner.dept || 'ທຄຕລ'
-            });
-
-            saveState();
-            renderAll();
             closeWinnerModal();
         }
 
         function closeWinnerModal() {
-            stopConfetti();
-            const modal = document.getElementById('winner-modal');
-            const card = document.getElementById('winner-card');
-
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            card.classList.remove('scale-100');
-            card.classList.add('scale-90');
-            pendingWinner = null;
+            document.getElementById('winnerModal').classList.add('hidden');
+            currentCandidateWinner = null;
         }
 
-        /* Confetti Animation Generator */
-        let confettiInterval = null;
-        function startConfetti() {
-            const canvas = document.getElementById('confetti-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const particles = [];
-            const colors = ['#E30613', '#FFEE00', '#1B1B65', '#FFFFFF', '#FACC15'];
-
-            for (let i = 0; i < 120; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    size: Math.random() * 8 + 4,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    speedY: Math.random() * 3 + 2,
-                    speedX: Math.random() * 2 - 1,
-                    rotation: Math.random() * 360,
-                    rotSpeed: Math.random() * 4 - 2
-                });
-            }
-
-            function drawConfetti() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => {
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
-                    ctx.rotate((p.rotation * Math.PI) / 180);
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                    ctx.restore();
-
-                    p.y += p.speedY;
-                    p.x += p.speedX;
-                    p.rotation += p.rotSpeed;
-
-                    if (p.y > canvas.height) {
-                        p.y = -10;
-                        p.x = Math.random() * canvas.width;
-                    }
-                });
-            }
-
-            clearInterval(confettiInterval);
-            confettiInterval = setInterval(drawConfetti, 1000 / 60);
+        /* --- ADMIN SECURITY PIN MODAL --- */
+        function openAdminSecurityModal() {
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('adminPinModal').classList.remove('hidden');
         }
 
-        function stopConfetti() {
-            clearInterval(confettiInterval);
-            const canvas = document.getElementById('confetti-canvas');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function closeAdminPinModal() {
+            document.getElementById('adminPinModal').classList.add('hidden');
+        }
+
+        function verifyAdminPin() {
+            const inputPin = document.getElementById('adminPinInput').value.trim();
+            if (inputPin === (state.adminPin || "1234")) {
+                closeAdminPinModal();
+                openAdminModal();
+            } else {
+                alert("ລະຫັດຜ່ານ PIN ບໍ່ຖືກຕ້ອງ!");
             }
         }
 
-        /* ----------------------------------------------------
-           ADMIN PANEL NAVIGATION & MANAGEMENT
-        ---------------------------------------------------- */
         function openAdminModal() {
-            renderAdminTabsContent();
-            const modal = document.getElementById('admin-modal');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('adminModal').classList.remove('hidden');
+            renderAll();
         }
 
         function closeAdminModal() {
-            const modal = document.getElementById('admin-modal');
-            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('adminModal').classList.add('hidden');
         }
 
-        function switchAdminTab(tabNum) {
-            for (let i = 1; i <= 4; i++) {
-                const btn = document.getElementById(`admin-tab-btn-${i}`);
-                const content = document.getElementById(`admin-tab-${i}`);
-                if (i === tabNum) {
-                    btn.className = "px-4 py-3 border-b-2 border-bcel-red font-bold text-sm text-bcel-yellow flex items-center gap-2 whitespace-nowrap";
-                    content.classList.remove('hidden');
-                } else {
-                    btn.className = "px-4 py-3 border-b-2 border-transparent font-medium text-sm text-slate-400 hover:text-white flex items-center gap-2 whitespace-nowrap";
-                    content.classList.add('hidden');
-                }
-            }
+        function switchAdminTab(tabName) {
+            const tabs = ['Participants', 'Prizes', 'Winners', 'Settings'];
+            tabs.forEach(t => {
+                document.getElementById(`content${t}`).classList.add('hidden');
+                const navBtn = document.getElementById(`navTab${t}`);
+                navBtn.className = "py-3 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 text-xs font-bold flex items-center gap-2 shrink-0";
+            });
+
+            document.getElementById(`content${tabName.replace('tab', '')}`).classList.remove('hidden');
+            document.getElementById(`nav${tabName}`).className = "py-3 px-4 border-b-2 border-bcel-gold text-bcel-gold text-xs font-bold flex items-center gap-2 shrink-0";
         }
 
-        function renderAdminTabsContent() {
-            renderParticipantsTable();
-            renderPrizesGrid();
-            renderWinnersTable();
-            renderBranding();
-        }
-
-        /* ----------------------------------------------------
-           TAB 1: PARTICIPANTS MANAGEMENT & EXCEL
-        ---------------------------------------------------- */
+        /* --- ADMIN TAB 1: PARTICIPANTS LOGIC --- */
         function renderParticipantsTable() {
-            const tbody = document.getElementById('participants-table-body');
-            const search = document.getElementById('participant-search').value.toLowerCase();
+            const tbody = document.getElementById('participantsTableBody');
             tbody.innerHTML = '';
 
+            const searchTerm = (document.getElementById('participantSearchInput').value || '').toLowerCase();
             const filtered = state.participants.filter(p => 
-                p.code.toLowerCase().includes(search) || 
-                p.name.toLowerCase().includes(search) || 
-                (p.dept && p.dept.toLowerCase().includes(search))
+                p.name.toLowerCase().includes(searchTerm) || 
+                (p.code && p.code.toLowerCase().includes(searchTerm)) ||
+                (p.dept && p.dept.toLowerCase().includes(searchTerm))
             );
 
-            document.getElementById('table-participant-count').innerText = state.participants.length;
+            document.getElementById('adminParticipantsCount').textContent = state.participants.length;
 
-            filtered.forEach(p => {
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-500">ບໍ່ພົບລາຍຊື່</td></tr>';
+                return;
+            }
+
+            filtered.forEach((p, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/40 transition";
-
-                const badge = p.won 
-                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-900/60 text-green-300 border border-green-700">ໄດ້ຮັບລາງວັນແລ້ວ</span>`
-                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300">ລໍຖ້າສຸ່ມ</span>`;
-
+                tr.className = "hover:bg-slate-900/60";
                 tr.innerHTML = `
-                    <td class="p-3 font-mono font-bold text-bcel-yellow">${p.code}</td>
-                    <td class="p-3 font-semibold text-white">${p.name}</td>
-                    <td class="p-3 text-slate-400">${p.dept || '-'}</td>
-                    <td class="p-3">${badge}</td>
+                    <td class="p-3 text-slate-500">${index + 1}</td>
+                    <td class="p-3 font-mono text-bcel-gold">${escapeHtml(p.code || '-')}</td>
+                    <td class="p-3 font-bold text-white">${escapeHtml(p.name)}</td>
+                    <td class="p-3 text-slate-400">${escapeHtml(p.dept || '-')}</td>
                     <td class="p-3 text-right">
-                        <button onclick="deleteParticipant('${p.id}')" class="text-slate-400 hover:text-red-400 p-1">
+                        <button onclick="removeParticipant('${index}')" class="text-red-400 hover:text-red-300">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </td>
@@ -1365,390 +1274,406 @@
         }
 
         function addSingleParticipant() {
-            const name = document.getElementById('add-name').value.trim();
+            const code = document.getElementById('addCodeInput').value.trim();
+            const name = document.getElementById('addNameInput').value.trim();
+            const dept = document.getElementById('addDeptInput').value.trim();
+
             if (!name) {
-                alert("ກະລຸນາປ້ອນຊື່ ແລະ ນາມສະກຸນ");
+                alert("ກະລຸນາປ້ອນຊື່ ແລະ ນາມສະກຸນ!");
                 return;
             }
-            let code = document.getElementById('add-code').value.trim();
-            if (!code) {
-                code = `BCEL-${String(state.participants.length + 1).padStart(3, '0')}`;
-            }
-            const dept = document.getElementById('add-dept').value.trim();
 
-            state.participants.push({
-                id: 'p-' + Date.now(),
-                code: code,
-                name: name,
-                dept: dept,
-                won: false
-            });
-
-            document.getElementById('add-name').value = '';
-            document.getElementById('add-code').value = '';
-            document.getElementById('add-dept').value = '';
-
+            state.participants.push({ code, name, dept });
             saveState();
             renderAll();
-            renderParticipantsTable();
+
+            document.getElementById('addCodeInput').value = '';
+            document.getElementById('addNameInput').value = '';
+            document.getElementById('addDeptInput').value = '';
         }
 
-        function deleteParticipant(id) {
-            state.participants = state.participants.filter(p => p.id !== id);
+        function removeParticipant(index) {
+            state.participants.splice(index, 1);
             saveState();
             renderAll();
-            renderParticipantsTable();
         }
 
-        function clearAllParticipants() {
-            if (confirm("ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບລາຍຊື່ທັງໝົດ?")) {
+        function confirmClearParticipants() {
+            if (confirm("ທ່ານ ຕ້ອງການລຶບລາຍຊື່ຜູ້ເຂົ້າຮ່ວມທັງໝົດແທ້ບໍ?")) {
                 state.participants = [];
                 saveState();
                 renderAll();
-                renderParticipantsTable();
             }
         }
 
-        function generateDemoParticipants(count = 30, overwrite = true) {
-            const laoFirst = ['ສົມໄຊ', 'ທອງດີ', 'ວັນເພັງ', 'ສຸລິຍາ', 'ດາວວອນ', 'ມະນີ', 'ອານຸສອນ', 'ວິໄລ', 'ຄຳພາ', 'ບຸນມີ'];
-            const laoLast = ['ໄຊຍະວົງ', 'ພົມມະຈັນ', 'ລາດຊະວົງ', 'ສີປະເສີດ', 'ວົງສະຫວາດ', 'ແກ້ວມະນີ', 'ດວງດາລາ', 'ສຸວັນນະ'];
-            const depts = ['ພະແນກ ເທັກໂນໂລຢີ', 'ພະແນກ ບັນຊີ', 'ພະແນກ ບໍລິການລູກຄ້າ', 'ພະແນກ ບໍລິຫານ', 'ພະແນກ ສິນເຊື່ອ'];
-
-            const demos = [];
-            for (let i = 1; i <= count; i++) {
-                const f = laoFirst[Math.floor(Math.random() * laoFirst.length)];
-                const l = laoLast[Math.floor(Math.random() * laoLast.length)];
-                const d = depts[Math.floor(Math.random() * depts.length)];
-                demos.push({
-                    id: 'demo-' + i + '-' + Date.now(),
-                    code: `BCEL-${String(i).padStart(3, '0')}`,
-                    name: `ທ່ານ ${f} ${l}`,
-                    dept: d,
-                    won: false
-                });
-            }
-
-            if (overwrite) {
-                state.participants = demos;
-            } else {
-                state.participants = [...state.participants, ...demos];
-            }
-
-            saveState();
-            renderAll();
-            renderParticipantsTable();
-        }
-
-        function toggleExcludeWinners(val) {
-            state.excludeWinners = val;
-            saveState();
-            renderStageInfo();
-            if (state.mode === 'wheel') drawWheel();
-        }
-
-        /* Excel Import / Export via SheetJS */
-        function handleExcelImport(event) {
-            const file = event.target.files[0];
+        function handleExcelImport(e) {
+            const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-                if (jsonData.length === 0) {
-                    alert("ໄຟລ໌ Excel ບໍ່ມີຂໍ້ມູນ!");
-                    return;
+                    // Expecting header or row format: [Code, Name, Dept]
+                    const newItems = [];
+                    json.forEach((row, idx) => {
+                        if (idx === 0 && (String(row[0]).toLowerCase().includes('code') || String(row[1]).toLowerCase().includes('name'))) {
+                            return; // Skip header row
+                        }
+                        if (row.length > 0 && row[1]) {
+                            newItems.push({
+                                code: String(row[0] || '').trim(),
+                                name: String(row[1] || '').trim(),
+                                dept: String(row[2] || '').trim()
+                            });
+                        } else if (row.length > 0 && row[0]) {
+                            newItems.push({
+                                code: `BCEL-${state.participants.length + newItems.length + 1}`,
+                                name: String(row[0]).trim(),
+                                dept: String(row[1] || '').trim()
+                            });
+                        }
+                    });
+
+                    if (newItems.length > 0) {
+                        state.participants.push(...newItems);
+                        saveState();
+                        renderAll();
+                        alert(`ນຳເຂົ້າລາຍຊື່ສຳເລັດ ${newItems.length} ຄົນ!`);
+                    } else {
+                        alert("ບໍ່ພົບຂໍ້ມູນລາຍຊື່ໃນໄຟລ໌!");
+                    }
+                } catch (err) {
+                    alert("ເກີດຂໍ້ຜິດພາດໃນການອ່ານໄຟລ໌ Excel/CSV!");
                 }
-
-                const newParticipants = jsonData.map((row, idx) => {
-                    const code = row['Code'] || row['code'] || row['ລະຫັດ'] || `BCEL-${String(idx + 1).padStart(3, '0')}`;
-                    const name = row['Name'] || row['name'] || row['ຊື່'] || row['ຊື່ ແລະ ນາມສະກຸນ'] || `Participant ${idx + 1}`;
-                    const dept = row['Department'] || row['dept'] || row['ພະແນກ'] || row['ເບີໂທ'] || '';
-                    return {
-                        id: 'imp-' + idx + '-' + Date.now(),
-                        code: String(code).trim(),
-                        name: String(name).trim(),
-                        dept: String(dept).trim(),
-                        won: false
-                    };
-                });
-
-                state.participants = newParticipants;
-                saveState();
-                renderAll();
-                renderParticipantsTable();
-                alert(`ນຳເຂົ້າລາຍຊື່ສຳເລັດ: ${newParticipants.length} ທ່ານ`);
             };
             reader.readAsArrayBuffer(file);
         }
 
         function downloadExcelTemplate() {
-            const templateData = [
-                { "ລະຫັດ": "BCEL-001", "ຊື່ ແລະ ນາມສະກຸນ": "ທ່ານ ສົມໄຊ ໄຊຍະວົງ", "ພະແນກ / ເບີໂທ": "ພະແນກ ເທັກໂນໂລຢີ" },
-                { "ລະຫັດ": "BCEL-002", "ຊື່ ແລະ ນາມສະກຸນ": "ທ່ານ ນາງ ວັນເພັງ ພົມມະຈັນ", "ພະແນກ / ເບີໂທ": "ພະແນກ ບັນຊີ" }
+            const wsData = [
+                ["ລະຫັດ (Code)", "ຊື່ ແລະ ນາມສະກຸນ (Name)", "ພະແນກ / ສາຂາ (Dept)"],
+                ["BCEL-001", "ທ່ານ ສົມໄຊ ໄຊຍະວົງ", "ພະແນກ ເທັກໂນໂລຊີ"],
+                ["BCEL-002", "ທ່ານ ມະນີວອນ ດວງດີ", "ພະແນກ ບັນຊີ"]
             ];
-            const ws = XLSX.utils.json_to_sheet(templateData);
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "BCEL_Participant_Template.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Participants");
+            XLSX.writeFile(wb, "BCEL_LuckyDraw_Template.xlsx");
         }
 
-        /* ----------------------------------------------------
-           TAB 2: PRIZES MANAGEMENT (FULL EDIT & ADD SUPPORT)
-        ---------------------------------------------------- */
-        function renderPrizesGrid() {
-            const container = document.getElementById('prizes-grid-container');
-            container.innerHTML = '';
+        function toggleBulkPasteBox() {
+            const area = document.getElementById('bulkPasteArea');
+            area.classList.toggle('hidden');
+        }
 
-            state.prizes.forEach(prize => {
+        function processBulkPaste() {
+            const text = document.getElementById('bulkPasteInput').value.trim();
+            if (!text) return;
+
+            const lines = text.split('\n');
+            const newItems = [];
+            lines.forEach(line => {
+                const parts = line.split(/[,;\t]/);
+                if (parts.length >= 2) {
+                    newItems.push({ code: parts[0].trim(), name: parts[1].trim(), dept: (parts[2] || '').trim() });
+                } else if (parts[0].trim()) {
+                    newItems.push({ code: `BCEL-${state.participants.length + newItems.length + 1}`, name: parts[0].trim(), dept: '' });
+                }
+            });
+
+            if (newItems.length > 0) {
+                state.participants.push(...newItems);
+                saveState();
+                renderAll();
+                document.getElementById('bulkPasteInput').value = '';
+                toggleBulkPasteBox();
+                alert(`ເພີ່ມລາຍຊື່ສຳເລັດ ${newItems.length} ຄົນ!`);
+            }
+        }
+
+        /* --- ADMIN TAB 2: PRIZES LOGIC --- */
+        function renderAdminPrizesGrid() {
+            const grid = document.getElementById('adminPrizesGrid');
+            grid.innerHTML = '';
+
+            document.getElementById('adminPrizesCount').textContent = state.prizes.length;
+
+            state.prizes.forEach(p => {
+                const wonCount = state.winners.filter(w => w.prizeId === p.id).length;
+                const remaining = Math.max(0, p.quota - wonCount);
+
                 const card = document.createElement('div');
-                card.className = "bg-slate-800/90 border border-slate-700 rounded-2xl p-4 flex flex-col justify-between gap-4 relative overflow-hidden group hover:border-bcel-yellow transition";
-
+                card.className = "bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between";
                 card.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <img src="${prize.img}" class="w-16 h-16 rounded-xl object-contain bg-slate-900 border border-slate-700 p-1 shrink-0" alt="${prize.title}">
-                        <div class="flex-1 min-w-0">
-                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold bg-bcel-red/30 text-bcel-yellow border border-bcel-red/40 mb-1">
-                                ${prize.rank || 'ລາງວັນ'}
-                            </span>
-                            <h4 class="font-bold text-white text-sm truncate">${prize.title}</h4>
-                            <p class="text-xs text-slate-400 truncate mt-0.5">${prize.desc || '-'}</p>
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 p-1 flex items-center justify-center overflow-hidden shrink-0" style="border-color: ${p.color || '#E30613'}">
+                            ${p.image ? `<img src="${p.image}" class="max-w-full max-h-full object-contain">` : `<i class="fa-solid fa-gift text-xl" style="color: ${p.color || '#FFEE00'}"></i>`}
+                        </div>
+                        <div class="flex-1 truncate">
+                            <h4 class="font-bold text-white text-sm truncate">${escapeHtml(p.title)}</h4>
+                            <div class="text-xs text-slate-400">ໂຄຕ້າ: <span class="text-bcel-gold font-bold">${p.quota}</span> | ແຈກແລ້ວ: <span class="text-emerald-400 font-bold">${wonCount}</span></div>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between border-t border-slate-700/80 pt-3 text-xs">
-                        <div>
-                            <span class="text-slate-400">ຈຳນວນເຫຼືອ:</span>
-                            <strong class="text-bcel-yellow text-sm ml-1">${prize.remaining} / ${prize.count}</strong>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <!-- EDIT BUTTON -->
-                            <button onclick="openPrizeEditMode('${prize.id}')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-bcel-yellow font-bold rounded-lg transition flex items-center gap-1">
+                    <div class="flex items-center justify-between border-t border-slate-900 pt-3">
+                        <span class="text-[11px] px-2 py-0.5 rounded-full font-bold text-slate-300 bg-slate-900">
+                            ຄົງເຫຼືອ: ${remaining}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editPrize('${p.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-bcel-gold rounded-lg text-xs font-semibold">
                                 <i class="fa-solid fa-pen-to-square"></i> ແກ້ໄຂ
                             </button>
-                            <!-- DELETE BUTTON -->
-                            <button onclick="deletePrize('${prize.id}')" class="px-2.5 py-1 bg-red-950/60 hover:bg-red-800 text-red-300 font-bold rounded-lg transition flex items-center gap-1">
+                            <button onclick="deletePrize('${p.id}')" class="px-2.5 py-1 bg-red-950/60 hover:bg-red-900 text-red-400 rounded-lg text-xs font-semibold">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
                     </div>
                 `;
-                container.appendChild(card);
+                grid.appendChild(card);
             });
         }
 
-        function handlePrizeImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function savePrizeItem() {
+            const editId = document.getElementById('editPrizeId').value;
+            const title = document.getElementById('prizeTitleInput').value.trim();
+            const quota = parseInt(document.getElementById('prizeQuotaInput').value) || 1;
+            const color = document.getElementById('prizeColorInput').value;
+            const fileInput = document.getElementById('prizeImageInput');
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = new Image();
-                img.onload = function () {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    const maxDim = 300;
-                    let w = img.width, h = img.height;
-                    if (w > h) { if (w > maxDim) { h *= maxDim / w; w = maxDim; } }
-                    else { if (h > maxDim) { w *= maxDim / h; h = maxDim; } }
-
-                    canvas.width = w; canvas.height = h;
-                    ctx.drawImage(img, 0, 0, w, h);
-
-                    const dataUrl = canvas.toDataURL('image/png');
-                    document.getElementById('prize-input-img-data').value = dataUrl;
-                    document.getElementById('prize-img-preview-box').innerHTML = `<img src="${dataUrl}" class="w-full h-full object-contain">`;
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function openPrizeEditMode(prizeId) {
-            const prize = state.prizes.find(p => p.id === prizeId);
-            if (!prize) return;
-
-            state.editingPrizeId = prizeId;
-            document.getElementById('prize-edit-id').value = prize.id;
-            document.getElementById('prize-input-title').value = prize.title;
-            document.getElementById('prize-input-rank').value = prize.rank || '';
-            document.getElementById('prize-input-count').value = prize.count;
-            document.getElementById('prize-input-desc').value = prize.desc || '';
-            document.getElementById('prize-input-img-data').value = prize.img;
-
-            // Preview Box
-            document.getElementById('prize-img-preview-box').innerHTML = `<img src="${prize.img}" class="w-full h-full object-contain">`;
-
-            // Form styling switch to EDIT MODE
-            const formCard = document.getElementById('prize-form-card');
-            formCard.className = "bg-slate-800/90 border-2 border-bcel-yellow p-5 rounded-2xl flex flex-col gap-4 shadow-xl transition-all duration-300";
-
-            document.getElementById('prize-form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-bcel-yellow"></i> ແກ້ໄຂຂໍ້ມູນຂອງລາງວັນ (Edit Mode)`;
-            document.getElementById('prize-form-badge').classList.remove('hidden');
-            document.getElementById('prize-submit-text').innerText = "ບັນທຶກການແກ້ໄຂ";
-            document.getElementById('prize-cancel-btn').classList.remove('hidden');
-
-            // Scroll to form cleanly
-            formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        function cancelPrizeEdit() {
-            state.editingPrizeId = null;
-            document.getElementById('prize-edit-id').value = '';
-            document.getElementById('prize-input-title').value = '';
-            document.getElementById('prize-input-rank').value = '';
-            document.getElementById('prize-input-count').value = '1';
-            document.getElementById('prize-input-desc').value = '';
-            document.getElementById('prize-input-img-data').value = '';
-            document.getElementById('prize-img-preview-box').innerHTML = `<i class="fa-solid fa-image text-slate-600"></i>`;
-
-            // Reset Form Styling
-            const formCard = document.getElementById('prize-form-card');
-            formCard.className = "bg-slate-800/80 border-2 border-slate-700 p-5 rounded-2xl flex flex-col gap-4 transition-all duration-300";
-
-            document.getElementById('prize-form-title').innerHTML = `<i class="fa-solid fa-gift text-bcel-yellow"></i> ເພີ່ມຂອງລາງວັນໃໝ່`;
-            document.getElementById('prize-form-badge').classList.add('hidden');
-            document.getElementById('prize-submit-text').innerText = "ບັນທຶກຂອງລາງວັນ";
-            document.getElementById('prize-cancel-btn').classList.add('hidden');
-        }
-
-        function savePrizeForm() {
-            const title = document.getElementById('prize-input-title').value.trim();
             if (!title) {
-                alert("ກະລຸນາປ້ອນຊື່ຂອງລາງວັນ");
+                alert("ກະລຸນາປ້ອນຊື່ຂອງລາງວັນ!");
                 return;
             }
 
-            const rank = document.getElementById('prize-input-rank').value.trim() || 'ລາງວັນ';
-            const count = parseInt(document.getElementById('prize-input-count').value) || 1;
-            const desc = document.getElementById('prize-input-desc').value.trim();
-            const imgData = document.getElementById('prize-input-img-data').value || `https://placehold.co/200x200/E30613/FFFFFF?text=${encodeURIComponent(title)}`;
-
-            if (state.editingPrizeId) {
-                // Update Existing Prize
-                const idx = state.prizes.findIndex(p => p.id === state.editingPrizeId);
-                if (idx !== -1) {
-                    const diff = count - state.prizes[idx].count;
-                    state.prizes[idx].title = title;
-                    state.prizes[idx].rank = rank;
-                    state.prizes[idx].count = count;
-                    state.prizes[idx].remaining = Math.max(0, state.prizes[idx].remaining + diff);
-                    state.prizes[idx].desc = desc;
-                    state.prizes[idx].img = imgData;
+            const proceedSave = (imgBase64) => {
+                if (editId) {
+                    const idx = state.prizes.findIndex(p => p.id === editId);
+                    if (idx !== -1) {
+                        state.prizes[idx].title = title;
+                        state.prizes[idx].quota = quota;
+                        state.prizes[idx].color = color;
+                        if (imgBase64) state.prizes[idx].image = imgBase64;
+                    }
+                } else {
+                    state.prizes.push({
+                        id: "p_" + Date.now(),
+                        title,
+                        quota,
+                        color,
+                        image: imgBase64 || ""
+                    });
                 }
-            } else {
-                // Add New Prize
-                const newPrize = {
-                    id: 'prize-' + Date.now(),
-                    title: title,
-                    rank: rank,
-                    count: count,
-                    remaining: count,
-                    desc: desc,
-                    img: imgData
-                };
-                state.prizes.push(newPrize);
-            }
+                saveState();
+                resetPrizeForm();
+                renderAll();
+            };
 
-            saveState();
-            cancelPrizeEdit();
-            renderAll();
-            renderPrizesGrid();
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => proceedSave(e.target.result);
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                proceedSave(null);
+            }
+        }
+
+        function editPrize(id) {
+            const p = state.prizes.find(pr => pr.id === id);
+            if (!p) return;
+
+            document.getElementById('editPrizeId').value = p.id;
+            document.getElementById('prizeTitleInput').value = p.title;
+            document.getElementById('prizeQuotaInput').value = p.quota;
+            document.getElementById('prizeColorInput').value = p.color || '#E30613';
+            
+            document.getElementById('prizeFormHeaderTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> <span>ແກ້ໄຂລາງວັນ: ${escapeHtml(p.title)}</span>`;
+            document.getElementById('savePrizeBtnText').textContent = "ອັບເດດລາງວັນ";
+            document.getElementById('cancelPrizeEditBtn').classList.remove('hidden');
+        }
+
+        function resetPrizeForm() {
+            document.getElementById('editPrizeId').value = '';
+            document.getElementById('prizeTitleInput').value = '';
+            document.getElementById('prizeQuotaInput').value = '1';
+            document.getElementById('prizeImageInput').value = '';
+            document.getElementById('prizeColorInput').value = '#E30613';
+            
+            document.getElementById('prizeFormHeaderTitle').innerHTML = `<i class="fa-solid fa-plus-circle"></i> <span>ເພີ່ມຂອງລາງວັນໃໝ່</span>`;
+            document.getElementById('savePrizeBtnText').textContent = "ບັນທຶກລາງວັນ";
+            document.getElementById('cancelPrizeEditBtn').classList.add('hidden');
         }
 
         function deletePrize(id) {
-            if (confirm("ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບຂອງລາງວັນນີ້?")) {
+            if (confirm("ທ່ານ ຕ້ອງການລຶບລາງວັນນີ້ແທ້ບໍ?")) {
                 state.prizes = state.prizes.filter(p => p.id !== id);
-                if (state.selectedPrizeId === id && state.prizes.length > 0) {
-                    state.selectedPrizeId = state.prizes[0].id;
-                }
+                state.winners = state.winners.filter(w => w.prizeId !== id);
                 saveState();
                 renderAll();
-                renderPrizesGrid();
             }
         }
 
-        /* ----------------------------------------------------
-           TAB 3: WINNERS HISTORY & EXPORT
-        ---------------------------------------------------- */
+        /* --- ADMIN TAB 3: WINNERS LOGIC --- */
         function renderWinnersTable() {
-            const tbody = document.getElementById('winners-table-body');
+            const tbody = document.getElementById('winnersTableBody');
+            const filterSelect = document.getElementById('winnerFilterPrizeSelect');
             tbody.innerHTML = '';
-            document.getElementById('winners-total-count').innerText = state.winners.length;
 
-            state.winners.forEach(w => {
+            // Update filter dropdown
+            filterSelect.innerHTML = '<option value="ALL">ທຸກລາງວັນ</option>';
+            state.prizes.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.title;
+                filterSelect.appendChild(opt);
+            });
+
+            const selectedPrize = filterSelect.value || "ALL";
+            const filtered = selectedPrize === "ALL" 
+                ? state.winners 
+                : state.winners.filter(w => w.prizeId === selectedPrize);
+
+            document.getElementById('adminWinnersCount').textContent = state.winners.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-500">ຍັງບໍ່ມີປະຫວັດຜູ້ໄດ້ລາງວັນ</td></tr>';
+                return;
+            }
+
+            filtered.forEach((w, index) => {
+                const p = state.prizes.find(pr => pr.id === w.prizeId);
+                const prizeTitle = p ? p.title : 'ລາງວັນ';
+                const timeStr = w.wonAt ? new Date(w.wonAt).toLocaleTimeString('lo-LA') : '-';
+
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/40 transition";
+                tr.className = "hover:bg-slate-900/60";
                 tr.innerHTML = `
-                    <td class="p-3 text-slate-400 font-mono">${w.timestamp}</td>
-                    <td class="p-3 font-bold text-bcel-yellow">${w.prizeTitle}</td>
-                    <td class="p-3 font-mono font-bold text-bcel-red">${w.code}</td>
-                    <td class="p-3 font-semibold text-white">${w.name}</td>
-                    <td class="p-3 text-slate-400">${w.dept}</td>
+                    <td class="p-3 text-slate-500">${index + 1}</td>
+                    <td class="p-3 font-bold text-bcel-gold">${escapeHtml(prizeTitle)}</td>
+                    <td class="p-3 font-mono text-slate-300">${escapeHtml(w.code || '-')}</td>
+                    <td class="p-3 font-bold text-white">${escapeHtml(w.name)}</td>
+                    <td class="p-3 text-slate-400">${escapeHtml(w.dept || '-')}</td>
+                    <td class="p-3 text-slate-400 font-mono text-[11px]">${timeStr}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="removeWinner('${w.id}')" class="text-red-400 hover:text-red-300">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function clearWinnersHistory() {
-            if (confirm("ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລ້າງປະຫວັດຜູ້ໂຊກດີ? (ລະບົບຈະຄືນຈຳນວນໂຄຕ້າຂອງລາງວັນໃຫ້ຄືນເກົ່າ)")) {
+        function removeWinner(winnerId) {
+            state.winners = state.winners.filter(w => w.id !== winnerId);
+            saveState();
+            renderAll();
+        }
+
+        function confirmClearWinners() {
+            if (confirm("ທ່ານ ຕ້ອງການລ້າງປະຫວັດຜູ້ໄດ້ລາງວັນທັງໝົດແທ້ບໍ?")) {
                 state.winners = [];
-                // Restore quota
-                state.prizes.forEach(p => {
-                    p.remaining = p.count;
-                });
-                // Reset participant won flag
-                state.participants.forEach(p => {
-                    p.won = false;
-                });
                 saveState();
                 renderAll();
-                renderWinnersTable();
             }
         }
 
-        function exportWinnersExcel() {
+        function exportWinnersToExcel() {
             if (state.winners.length === 0) {
-                alert("ບໍ່ມີປະຫວັດຜູ້ໂຊກດີໃຫ້ export!");
+                alert("ບໍ່ມີຂໍ້ມູນຜູ້ໄດ້ລາງວັນໃຫ້ສົ່ງອອກ!");
                 return;
             }
-
-            const exportData = state.winners.map((w, idx) => ({
-                "ລຳດັບ": idx + 1,
-                "ເວລາໄດ້ຮັບ": w.timestamp,
-                "ຂອງລາງວັນ": w.prizeTitle,
-                "ລະຫັດ": w.code,
-                "ຊື່ ແລະ ນາມສະກຸນ": w.name,
-                "ພະແນກ / ຂໍ້ມູນ": w.dept
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(exportData);
+            const data = state.winners.map((w, i) => {
+                const p = state.prizes.find(pr => pr.id === w.prizeId);
+                return {
+                    "ລຳດັບ": i + 1,
+                    "ລາງວັນ": p ? p.title : '',
+                    "ລະຫັດ": w.code || '',
+                    "ຊື່ ແລະ ນາມສະກຸນ": w.name,
+                    "ພະແນກ/ສາຂາ": w.dept || '',
+                    "ເວລາ": w.wonAt ? new Date(w.wonAt).toLocaleString('lo-LA') : ''
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Winners");
             XLSX.writeFile(wb, `BCEL_Winners_${Date.now()}.xlsx`);
         }
 
-        /* ----------------------------------------------------
-           RESET ALL DEMO DATA
-        ---------------------------------------------------- */
-        function resetAllDemoData() {
-            if (confirm("ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການຣີເຊັດຂໍ້ມູນທັງໝົດເປັນຄ່າເລີ່ມຕົ້ນ demo?")) {
-                localStorage.removeItem('bcel_lucky_draw_state');
-                state.prizes = JSON.parse(JSON.stringify(DEFAULT_DEMO_PRIZES));
-                state.winners = [];
-                state.logoUrl = "";
-                state.eventTitle = "ງານລຸ້ນຮັບລາງວັນ BCEL Lucky Draw 2026";
-                state.eventSubtitle = "ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ (BCEL)";
-                generateDemoParticipants(30, true);
+        function exportWinnersToCSV() {
+            if (state.winners.length === 0) {
+                alert("ບໍ່ມີຂໍ້ມູນຜູ້ໄດ້ລາງວັນ!");
+                return;
+            }
+            let csv = "\uFEFF# , ລາງວັນ , ລະຫັດ , ຊື່ ແລະ ນາມສະກຸນ , ພະແນກ\n";
+            state.winners.forEach((w, i) => {
+                const p = state.prizes.find(pr => pr.id === w.prizeId);
+                csv += `"${i+1}","${p ? p.title : ''}","${w.code || ''}","${w.name}","${w.dept || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `BCEL_Winners_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        /* --- ADMIN TAB 4: SETTINGS & LOGO LOGIC --- */
+        function saveEventSettings() {
+            state.eventTitle = document.getElementById('settingEventTitle').value.trim() || "BCEL LUCKY DRAW 2026";
+            state.eventSubtitle = document.getElementById('settingEventSubtitle').value.trim();
+            state.adminPin = document.getElementById('settingAdminPin').value.trim() || "1234";
+            state.autoRemoveWinner = document.getElementById('settingAutoRemoveWinner').checked;
+
+            saveState();
+            renderAll();
+            alert("ບັນທຶກການຕັ້ງຄ່າ ແລະ ອັບເດດໄປ Supabase Cloud ເຣັດຮຽບຮ້ອຍ!");
+        }
+
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                state.customLogo = evt.target.result;
                 saveState();
                 renderAll();
-                renderAdminTabsContent();
-                alert("ຣີເຊັດຂໍ້ມູນ demo ເລີ່ມຕົ້ນຮຽບຮ້ອຍແລ້ວ!");
-            }
+            };
+            reader.readAsDataURL(file);
         }
+
+        function resetToDefaultLogo() {
+            state.customLogo = DEFAULT_BCEL_LOGO;
+            saveState();
+            renderAll();
+        }
+
+        /* --- UTILS --- */
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        /* --- INITIALIZATION --- */
+        window.onload = function() {
+            // Load state from Supabase Cloud on startup
+            loadStateFromSupabase();
+
+            // Handle Resize for Lucky Wheel Canvas
+            window.addEventListener('resize', () => {
+                if (activeDrawMode === 'wheel') drawWheelCanvas();
+            });
+        };
     </script>
 </body>
 </html>
