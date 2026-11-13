@@ -42,15 +42,16 @@
     <style>
         body {
             font-family: 'Noto Sans Lao', 'Plus Jakarta Sans', sans-serif;
-            background-color: #0E0E3B;
+            background: linear-gradient(180deg, #E30613 0%, #f4434e 32%, #ffffff 78%, #ffffff 100%);
+            background-attachment: fixed;
             color: #1E293B;
             min-height: 100vh;
         }
 
         /* Slot Machine Animations */
         .slot-window {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.9) 100%);
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 20px rgba(227, 6, 19, 0.4);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.96) 50%, rgba(15, 23, 42, 0.94) 100%);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 20px rgba(227, 6, 19, 0.35);
             border: 3px solid #D4AF37;
         }
 
@@ -84,7 +85,7 @@
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 23, 42, 0.2);
         }
         ::-webkit-scrollbar-thumb {
             background: #D4AF37;
@@ -92,10 +93,10 @@
         }
     </style>
 </head>
-<body class="bg-bcel-darknavy text-slate-100 flex flex-col min-h-screen selection:bg-bcel-red selection:text-white">
+<body class="text-slate-800 flex flex-col min-h-screen selection:bg-bcel-red selection:text-white">
 
     <!-- Header Section -->
-    <header class="bg-slate-900/90 border-b border-bcel-gold/30 sticky top-0 z-30 backdrop-blur-md px-4 py-3 shadow-xl">
+    <header class="bg-bcel-navy/95 border-b border-bcel-gold/40 sticky top-0 z-30 backdrop-blur-md px-4 py-3 shadow-xl text-white">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
             
             <!-- Logo & Event Title -->
@@ -107,7 +108,7 @@
                     <h1 id="displayEventTitle" class="text-xl md:text-2xl font-extrabold gold-gradient-text tracking-wide uppercase">
                         BCEL LUCKY DRAW 2026
                     </h1>
-                    <p id="displayEventSubtitle" class="text-xs text-slate-300 font-medium">
+                    <p id="displayEventSubtitle" class="text-xs text-slate-200 font-medium">
                         ທະນາຄານ ການຄ້າຕ່າງປະເທດລາວ ມະຫາຊົນ - ງານສຸ່ມລາງວັນຜູ້ໂຊກດີ
                     </p>
                 </div>
@@ -116,24 +117,24 @@
             <!-- Top Right Action Controls & Cloud Sync Status -->
             <div class="flex items-center gap-2 flex-wrap">
                 <!-- Sync Status Badge -->
-                <div id="syncBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-amber-300 border border-amber-500/30 shadow-inner">
+                <div id="syncBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-900/90 text-amber-300 border border-amber-500/30 shadow-inner">
                     <i id="syncIcon" class="fa-solid fa-cloud-arrow-down animate-pulse text-amber-400"></i>
                     <span id="syncText">ກຳລັງກວດສອບ Cloud...</span>
                 </div>
 
                 <!-- Refresh Data Button -->
-                <button onclick="manualRefreshCloud()" title="ດຶງຂໍ້ມູນໃໝ່ຈາກ Cloud" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+                <button onclick="manualRefreshCloud()" title="ດຶງຂໍ້ມູນໃໝ່ຈາກ Cloud" class="px-3 py-1.5 bg-slate-900/80 hover:bg-slate-800 text-slate-100 border border-slate-600 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
                     <i class="fa-solid fa-rotate text-bcel-gold"></i>
                     <span class="hidden sm:inline">ດຶງຂໍ້ມູນໃໝ່</span>
                 </button>
 
                 <!-- Audio Sound Mute Toggle -->
-                <button id="soundToggleBtn" onclick="toggleSound()" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-bcel-gold transition" title="ເປີດ/ປິດ ສຽງ">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="w-9 h-9 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700 flex items-center justify-center text-bcel-gold transition" title="ເປີດ/ປິດ ສຽງ">
                     <i id="soundIcon" class="fa-solid fa-volume-high"></i>
                 </button>
 
                 <!-- Admin Management Button -->
-                <button onclick="openAdminSecurityModal()" class="px-4 py-2 bg-gradient-to-r from-bcel-navy to-slate-800 hover:from-bcel-red hover:to-red-700 border border-bcel-gold/40 text-white rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                <button onclick="openAdminSecurityModal()" class="px-4 py-2 bg-gradient-to-r from-bcel-red to-red-700 hover:from-red-600 hover:to-red-800 border border-bcel-gold/60 text-white rounded-lg text-xs font-bold transition flex items-center gap-2 shadow-lg">
                     <i class="fa-solid fa-sliders text-bcel-gold"></i>
                     <span>ຈັດການລະບົບ (Admin)</span>
                 </button>
@@ -144,26 +145,34 @@
     <!-- Main Content Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- Mode Switcher Tabs & Active Prize Cards -->
-        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800 backdrop-blur-sm">
+        <!-- Mode Switcher Tabs & Dropdown Prize Selector Bar -->
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/95 p-4 rounded-2xl border border-bcel-gold/60 shadow-lg backdrop-blur-md">
             
             <!-- Dual Mode Buttons -->
-            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 self-start md:self-auto">
+            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto shrink-0">
                 <button id="tabModeSlot" onclick="switchDrawMode('slot')" class="px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 bg-bcel-red text-white shadow-md">
                     <i class="fa-solid fa-bolt"></i>
                     <span>Slot Machine (ສຸ່ມໄວ)</span>
                 </button>
-                <button id="tabModeWheel" onclick="switchDrawMode('wheel')" class="px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-400 hover:text-white">
+                <button id="tabModeWheel" onclick="switchDrawMode('wheel')" class="px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:text-bcel-navy">
                     <i class="fa-solid fa-compact-disc"></i>
                     <span>Lucky Wheel (ວົງລໍ້)</span>
                 </button>
             </div>
 
-            <!-- Active Prize Selector Selector -->
-            <div class="flex-1 flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-                <span class="text-xs font-semibold text-slate-400 shrink-0"><i class="fa-solid fa-gift text-bcel-gold mr-1"></i>ເລືອກລາງວັນ:</span>
-                <div id="prizeSelectorContainer" class="flex items-center gap-2 min-w-max">
-                    <!-- Dynamic Prize Pills -->
+            <!-- Active Prize Dropdown Selector -->
+            <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+                <label for="prizeDropdownSelect" class="text-xs font-bold text-bcel-navy shrink-0 flex items-center gap-1.5">
+                    <i class="fa-solid fa-gift text-bcel-red text-sm"></i>
+                    <span>ເລືອກລາງວັນທີ່ຈະສຸ່ມ:</span>
+                </label>
+                <div class="relative min-w-[260px] md:min-w-[340px]">
+                    <select id="prizeDropdownSelect" onchange="selectActivePrize(this.value)" class="w-full appearance-none bg-slate-50 hover:bg-white border-2 border-bcel-navy/30 focus:border-bcel-red text-slate-900 font-bold text-xs md:text-sm rounded-xl pl-4 pr-10 py-2.5 shadow-sm focus:outline-none transition cursor-pointer">
+                        <!-- Dynamic Prize Options -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-bcel-red">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -172,21 +181,30 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             
             <!-- Left 2 Cols: Main Draw Arena (Slot or Wheel) -->
-            <div class="lg:col-span-2 bg-slate-900/80 rounded-3xl p-6 border border-bcel-gold/30 shadow-2xl flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden">
+            <div class="lg:col-span-2 bg-slate-900/95 rounded-3xl p-6 border-2 border-bcel-gold/50 shadow-2xl flex flex-col items-center justify-center min-h-[440px] relative overflow-hidden text-white">
                 
                 <!-- Background Ambient Glow -->
-                <div class="absolute -top-24 -left-24 w-72 h-72 bg-bcel-red/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-bcel-navy/40 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -top-24 -left-24 w-72 h-72 bg-bcel-red/25 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-bcel-navy/50 rounded-full blur-3xl pointer-events-none"></div>
 
-                <!-- Current Selected Prize Header Info -->
-                <div class="w-full text-center mb-6 z-10">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-bcel-red/20 border border-bcel-red/50 rounded-full text-bcel-gold text-xs font-bold uppercase tracking-wider mb-2">
-                        <i class="fa-solid fa-trophy"></i>
-                        <span id="activePrizeNameDisplay">ກຳລັງໂຫຼດລາງວັນ...</span>
+                <!-- Selected Prize Card Preview -->
+                <div class="w-full max-w-xl bg-slate-950/80 border border-bcel-gold/40 rounded-2xl p-3.5 mb-6 z-10 flex items-center gap-4 shadow-lg">
+                    <div class="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-white p-1.5 border-2 border-bcel-gold flex items-center justify-center overflow-hidden shrink-0 shadow-md">
+                        <img id="activePrizePreviewImg" src="" alt="Prize Image" class="max-w-full max-h-full object-contain hidden">
+                        <i id="activePrizeFallbackIcon" class="fa-solid fa-gift text-3xl text-bcel-red"></i>
                     </div>
-                    <p class="text-xs text-slate-400">
-                        ໂຄຕ້າທີ່ເຫຼືອ: <span id="activePrizeQuotaDisplay" class="font-bold text-white">0</span> / <span id="activePrizeTotalDisplay" class="text-slate-400">0</span>
-                    </p>
+                    <div class="flex-1 min-w-0">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-bcel-red/20 border border-bcel-red/50 rounded-full text-bcel-gold text-[11px] font-bold uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-trophy"></i>
+                            <span id="activePrizeCategoryDisplay">ລາງວັນປະຈຳງານ</span>
+                        </div>
+                        <h2 id="activePrizeNameDisplay" class="text-base md:text-xl font-extrabold text-white truncate">
+                            ກຳລັງໂຫຼດລາງວັນ...
+                        </h2>
+                        <p class="text-xs text-slate-300 mt-0.5">
+                            ໂຄຕ້າທີ່ເຫຼືອ: <span id="activePrizeQuotaDisplay" class="font-black text-bcel-gold text-sm">0</span> / <span id="activePrizeTotalDisplay" class="text-slate-400">0</span> ລາງວັນ
+                        </p>
+                    </div>
                 </div>
 
                 <!-- SLOT MACHINE VIEW -->
@@ -250,23 +268,23 @@
             </div>
 
             <!-- Right 1 Col: Live Stats & Recent Winners Sidebar -->
-            <div class="bg-slate-900/80 rounded-3xl p-5 border border-slate-800 flex flex-col gap-4 min-h-[420px]">
+            <div class="bg-white/95 rounded-3xl p-5 border border-slate-200 shadow-xl flex flex-col gap-4 min-h-[440px] text-slate-800 backdrop-blur-md">
                 
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-users text-bcel-gold"></i>
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <h3 class="text-sm font-extrabold text-bcel-navy flex items-center gap-2">
+                        <i class="fa-solid fa-users text-bcel-red"></i>
                         <span>ຜູ້ເຂົ້າຮ່ວມ & ຜູ້ໂຊກດີ</span>
                     </h3>
-                    <span id="participantCountBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-bcel-navy text-bcel-gold border border-bcel-gold/30">
+                    <span id="participantCountBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-bcel-navy text-bcel-gold shadow-sm">
                         0 ຄົນ
                     </span>
                 </div>
 
                 <!-- Recent Winners Mini List -->
                 <div class="flex-1 flex flex-col">
-                    <h4 class="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider flex items-center justify-between">
                         <span>ຜູ້ໂຊກດີລ້າສຸດ:</span>
-                        <button onclick="switchAdminTab('tabWinners'); openAdminModal();" class="text-[11px] text-bcel-gold hover:underline">ເບິ່ງທັງໝົດ</button>
+                        <button onclick="switchAdminTab('tabWinners'); openAdminModal();" class="text-[11px] text-bcel-red font-bold hover:underline">ເບິ່ງທັງໝົດ</button>
                     </h4>
 
                     <div id="recentWinnersList" class="flex-1 space-y-2 overflow-y-auto max-h-[300px] pr-1">
@@ -275,14 +293,14 @@
                 </div>
 
                 <!-- Event Stats Summary -->
-                <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-800 text-center">
-                    <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-slate-400">ລາງວັນທີ່ແຈກແລ້ວ</div>
-                        <div id="totalWonCount" class="text-base font-black text-bcel-gold">0</div>
+                <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-200 text-center">
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <div class="text-[10px] font-semibold text-slate-500">ລາງວັນທີ່ແຈກແລ້ວ</div>
+                        <div id="totalWonCount" class="text-base font-black text-bcel-red">0</div>
                     </div>
-                    <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                        <div class="text-[10px] text-slate-400">ລາງວັນຄົງເຫຼືອ</div>
-                        <div id="totalRemainingCount" class="text-base font-black text-emerald-400">0</div>
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <div class="text-[10px] font-semibold text-slate-500">ລາງວັນຄົງເຫຼືອ</div>
+                        <div id="totalRemainingCount" class="text-base font-black text-emerald-600">0</div>
                     </div>
                 </div>
 
@@ -293,13 +311,13 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-800 py-3 text-center text-xs text-slate-400 mt-auto">
+    <footer class="bg-bcel-navy text-slate-200 border-t border-bcel-gold/30 py-3 text-center text-xs mt-auto">
         <p>© 2026 BCEL - Banque Pour Le Commerce Exterieur Lao Public. Cloud Synced with Supabase.</p>
     </footer>
 
-    <!-- WINNER REVEAL MODAL -->
+    <!-- WINNER REVEAL MODAL (RESULT PAGE WITH PRIZE IMAGE) -->
     <div id="winnerModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-bcel-darknavy border-2 border-bcel-gold rounded-3xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden animate-bounce-short">
+        <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-bcel-darknavy border-2 border-bcel-gold rounded-3xl max-w-md w-full p-6 text-center shadow-2xl relative overflow-hidden text-white">
             
             <!-- Close Cross -->
             <button onclick="closeWinnerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
@@ -307,28 +325,35 @@
             </button>
 
             <!-- Winner Header Banner -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-bcel-gold text-slate-950 font-black rounded-full text-xs uppercase tracking-widest mb-4 shadow-lg">
-                <i class="fa-solid fa-crown"></i>
-                <span>ຂໍສະແດງຄວາມຍິນດີ! WINNER</span>
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <div class="w-8 h-8 bg-white rounded-full p-1 border border-bcel-gold flex items-center justify-center shrink-0">
+                    <img id="winnerModalLogo" src="" alt="BCEL" class="max-w-full max-h-full object-contain">
+                </div>
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-bcel-gold text-slate-950 font-black rounded-full text-xs uppercase tracking-widest shadow-lg">
+                    <i class="fa-solid fa-crown"></i>
+                    <span>ຂໍສະແດງຄວາມຍິນດີ! WINNER</span>
+                </div>
             </div>
 
-            <div class="w-20 h-20 bg-white rounded-full mx-auto p-1 border-2 border-bcel-gold shadow-lg mb-4 flex items-center justify-center">
-                <img id="winnerModalLogo" src="" alt="BCEL" class="max-w-full max-h-full object-contain">
+            <!-- Assigned Prize Image Showcase -->
+            <div id="winnerPrizeImgContainer" class="w-36 h-36 md:w-40 md:h-40 bg-white rounded-2xl mx-auto p-2.5 border-4 border-bcel-gold shadow-[0_0_25px_rgba(255,238,0,0.35)] mb-3 flex items-center justify-center overflow-hidden">
+                <img id="winnerPrizeImg" src="" alt="Prize Image" class="max-w-full max-h-full object-contain hidden">
+                <i id="winnerPrizeFallbackIcon" class="fa-solid fa-gift text-5xl text-bcel-red"></i>
             </div>
 
-            <h3 id="winnerPrizeTitle" class="text-lg font-bold text-bcel-gold mb-1">ລາງວັນທີ 1</h3>
-            <p id="winnerPrizeDetail" class="text-xs text-slate-300 mb-6">iPhone 15 Pro Max</p>
+            <h3 id="winnerPrizeTitle" class="text-xl font-extrabold text-bcel-gold mb-0.5">ລາງວັນທີ 1</h3>
+            <p id="winnerPrizeDetail" class="text-xs text-slate-300 mb-5">ໂຄຕ້າ: 1 ລາງວັນ</p>
 
             <!-- Winner Card Box -->
             <div class="bg-slate-950/90 border border-bcel-gold/40 rounded-2xl p-5 mb-6 text-center shadow-inner">
                 <div id="winnerCode" class="text-xs font-mono text-bcel-gold font-bold mb-1">CODE: BCEL-8899</div>
                 <div id="winnerName" class="text-2xl md:text-3xl font-extrabold text-white mb-2">ທ່ານ ສົມໄຊ ໄຊຍະວົງ</div>
-                <div id="winnerDept" class="text-sm font-medium text-slate-300">ພະແນກ ເທັກໂນໂລຊີ ສາລານformat</div>
+                <div id="winnerDept" class="text-sm font-medium text-slate-300">ພະແນກ ເທັກໂນໂລຊີ</div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center gap-3 justify-center">
-                <button onclick="confirmAndSaveWinner()" class="bcel-btn-red text-white text-sm font-bold px-6 py-2.5 rounded-xl flex-1 shadow-lg flex items-center justify-center gap-2">
+                <button onclick="confirmAndSaveWinner()" class="bcel-btn-red text-white text-sm font-bold px-6 py-3 rounded-xl flex-1 shadow-lg flex items-center justify-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-check"></i>
                     <span>ຢືນຢັນຜູ້ໂຊກດີ (Save)</span>
                 </button>
@@ -338,7 +363,7 @@
 
     <!-- SECURITY PIN MODAL (Protected Admin Access) -->
     <div id="adminPinModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-900 border border-bcel-gold/40 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center">
+        <div class="bg-slate-900 border border-bcel-gold/40 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center text-white">
             <div class="w-12 h-12 bg-bcel-navy text-bcel-gold rounded-full mx-auto flex items-center justify-center text-xl mb-3 border border-bcel-gold/30">
                 <i class="fa-solid fa-lock"></i>
             </div>
@@ -355,7 +380,7 @@
     </div>
 
     <!-- MAIN ADMIN MANAGEMENT PANEL MODAL -->
-    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 hidden">
+    <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 hidden text-slate-100">
         <div class="bg-slate-900 border border-bcel-gold/40 rounded-3xl max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             
             <!-- Admin Top Header -->
@@ -854,7 +879,7 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
             document.getElementById('winnerModalLogo').src = logoSrc;
             document.getElementById('settingLogoPreview').src = logoSrc;
 
-            // Render Prize Selector Pills
+            // Render Prize Selector Dropdown & Preview Card
             renderPrizeSelector();
             
             // Render Recent Winners & Counts
@@ -872,11 +897,20 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
         }
 
         function renderPrizeSelector() {
-            const container = document.getElementById('prizeSelectorContainer');
-            container.innerHTML = '';
+            const selectEl = document.getElementById('prizeDropdownSelect');
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
 
             if (state.prizes.length === 0) {
-                container.innerHTML = '<span class="text-xs text-red-400">ຍັງບໍ່ມີລາງວັນ</span>';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = '-- ຍັງບໍ່ມີລາງວັນໃນລະບົບ --';
+                selectEl.appendChild(opt);
+                document.getElementById('activePrizeNameDisplay').textContent = 'ຍັງບໍ່ມີລາງວັນ';
+                document.getElementById('activePrizeQuotaDisplay').textContent = '0';
+                document.getElementById('activePrizeTotalDisplay').textContent = '0';
+                document.getElementById('activePrizePreviewImg').classList.add('hidden');
+                document.getElementById('activePrizeFallbackIcon').classList.remove('hidden');
                 return;
             }
 
@@ -885,39 +919,46 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
                 state.activePrizeId = state.prizes[0].id;
             }
 
-            state.prizes.forEach(p => {
+            state.prizes.forEach((p, idx) => {
                 const wonCount = state.winners.filter(w => w.prizeId === p.id).length;
                 const remaining = Math.max(0, p.quota - wonCount);
-                const isActive = p.id === state.activePrizeId;
-
-                const btn = document.createElement('button');
-                btn.onclick = () => selectActivePrize(p.id);
-                btn.className = `px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-2 border ${
-                    isActive 
-                    ? 'bg-bcel-red text-white border-bcel-gold shadow-md' 
-                    : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
-                }`;
-
-                btn.innerHTML = `
-                    <span>${escapeHtml(p.title)}</span>
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] ${remaining > 0 ? 'bg-slate-950 text-bcel-gold' : 'bg-slate-800 text-slate-500'}">
-                        ${remaining}/${p.quota}
-                    </span>
-                `;
-                container.appendChild(btn);
+                
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${idx + 1}. ${p.title} (ຄົງເຫຼືອ: ${remaining}/${p.quota})`;
+                if (p.id === state.activePrizeId) {
+                    opt.selected = true;
+                }
+                selectEl.appendChild(opt);
             });
 
-            // Update main Active Prize Banner
+            // Update Active Prize Card Preview
             const activeP = state.prizes.find(p => p.id === state.activePrizeId);
             if (activeP) {
                 const wonCount = state.winners.filter(w => w.prizeId === activeP.id).length;
+                const remaining = Math.max(0, activeP.quota - wonCount);
+
                 document.getElementById('activePrizeNameDisplay').textContent = activeP.title;
-                document.getElementById('activePrizeQuotaDisplay').textContent = Math.max(0, activeP.quota - wonCount);
+                document.getElementById('activePrizeQuotaDisplay').textContent = remaining;
                 document.getElementById('activePrizeTotalDisplay').textContent = activeP.quota;
+
+                const previewImg = document.getElementById('activePrizePreviewImg');
+                const fallbackIcon = document.getElementById('activePrizeFallbackIcon');
+
+                if (activeP.image) {
+                    previewImg.src = activeP.image;
+                    previewImg.classList.remove('hidden');
+                    fallbackIcon.classList.add('hidden');
+                } else {
+                    previewImg.src = '';
+                    previewImg.classList.add('hidden');
+                    fallbackIcon.classList.remove('hidden');
+                }
             }
         }
 
         function selectActivePrize(prizeId) {
+            if (!prizeId) return;
             state.activePrizeId = prizeId;
             renderPrizeSelector();
             saveState();
@@ -943,7 +984,7 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
             document.getElementById('totalRemainingCount').textContent = Math.max(0, totalQuota - totalWon);
 
             if (state.winners.length === 0) {
-                list.innerHTML = '<div class="text-center py-8 text-xs text-slate-500">ຍັງບໍ່ມີຜູ້ໄດ້ລາງວັນ</div>';
+                list.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">ຍັງບໍ່ມີຜູ້ໄດ້ລາງວັນ</div>';
                 return;
             }
 
@@ -954,13 +995,13 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
                 const prizeName = p ? p.title : 'ລາງວັນ';
                 
                 const card = document.createElement('div');
-                card.className = "bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs";
+                card.className = "bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between text-xs shadow-sm";
                 card.innerHTML = `
                     <div class="truncate mr-2">
-                        <div class="font-bold text-slate-200 truncate">${escapeHtml(w.name)}</div>
-                        <div class="text-[10px] text-bcel-gold font-mono truncate">${escapeHtml(prizeName)}</div>
+                        <div class="font-bold text-slate-900 truncate">${escapeHtml(w.name)}</div>
+                        <div class="text-[11px] text-bcel-red font-bold truncate">${escapeHtml(prizeName)}</div>
                     </div>
-                    <div class="text-[10px] text-slate-400 font-mono shrink-0">${escapeHtml(w.code || '')}</div>
+                    <div class="text-[10px] text-bcel-navy font-mono font-bold bg-slate-200/70 px-2 py-0.5 rounded shrink-0">${escapeHtml(w.code || '')}</div>
                 `;
                 list.appendChild(card);
             });
@@ -978,12 +1019,12 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
                 slotView.classList.remove('hidden');
                 wheelView.classList.add('hidden');
                 tabSlot.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 bg-bcel-red text-white shadow-md";
-                tabWheel.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-400 hover:text-white";
+                tabWheel.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:text-bcel-navy";
             } else {
                 slotView.classList.add('hidden');
                 wheelView.classList.remove('hidden');
                 tabWheel.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 bg-bcel-red text-white shadow-md";
-                tabSlot.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-400 hover:text-white";
+                tabSlot.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 text-slate-600 hover:text-bcel-navy";
                 drawWheelCanvas();
             }
         }
@@ -1111,6 +1152,12 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
                 return;
             }
 
+            const wonCount = state.winners.filter(w => w.prizeId === activePrize.id).length;
+            if (wonCount >= activePrize.quota) {
+                alert(`ລາງວັນ "${activePrize.title}" ແຈກຄົບໂຄຕ້າແລ້ວ!`);
+                return;
+            }
+
             isSpinning = true;
             document.getElementById('spinWheelBtn').disabled = true;
 
@@ -1162,6 +1209,19 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
                     origin: { y: 0.6 }
                 });
             } catch (e) {}
+
+            // Display Prize Image in Result Modal
+            const prizeImgEl = document.getElementById('winnerPrizeImg');
+            const fallbackIconEl = document.getElementById('winnerPrizeFallbackIcon');
+            if (prize.image) {
+                prizeImgEl.src = prize.image;
+                prizeImgEl.classList.remove('hidden');
+                fallbackIconEl.classList.add('hidden');
+            } else {
+                prizeImgEl.src = '';
+                prizeImgEl.classList.add('hidden');
+                fallbackIconEl.classList.remove('hidden');
+            }
 
             document.getElementById('winnerPrizeTitle').textContent = prize.title;
             document.getElementById('winnerPrizeDetail').textContent = `ໂຄຕ້າ: ${prize.quota} ລາງວັນ`;
@@ -1318,11 +1378,10 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const json = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-                    // Expecting header or row format: [Code, Name, Dept]
                     const newItems = [];
                     json.forEach((row, idx) => {
                         if (idx === 0 && (String(row[0]).toLowerCase().includes('code') || String(row[1]).toLowerCase().includes('name'))) {
-                            return; // Skip header row
+                            return;
                         }
                         if (row.length > 0 && row[1]) {
                             newItems.push({
@@ -1520,14 +1579,15 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
         function renderWinnersTable() {
             const tbody = document.getElementById('winnersTableBody');
             const filterSelect = document.getElementById('winnerFilterPrizeSelect');
+            const currentFilter = filterSelect.value || "ALL";
             tbody.innerHTML = '';
 
-            // Update filter dropdown
             filterSelect.innerHTML = '<option value="ALL">ທຸກລາງວັນ</option>';
             state.prizes.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
                 opt.textContent = p.title;
+                if (p.id === currentFilter) opt.selected = true;
                 filterSelect.appendChild(opt);
             });
 
@@ -1666,10 +1726,8 @@ BCEL-002, ທ່ານ ມະນີ, ບັນຊີ" class="w-full bg-slate-900
 
         /* --- INITIALIZATION --- */
         window.onload = function() {
-            // Load state from Supabase Cloud on startup
             loadStateFromSupabase();
 
-            // Handle Resize for Lucky Wheel Canvas
             window.addEventListener('resize', () => {
                 if (activeDrawMode === 'wheel') drawWheelCanvas();
             });
